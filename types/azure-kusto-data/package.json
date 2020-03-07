@@ -1,6 +1,6 @@
 {
     "private": true,
     "dependencies": {
-        "adal-node": "^0.1.28"
+        "adal-node": "^0.2.1"
     }
 }
