@@ -2,7 +2,7 @@
     "private": true,
     "dependencies": {
         "grpc": "^1.16.1",
-        "mali": "^0.10.2",
+        "mali": "^0.20.0",
         "protobufjs": "^6.8.8"
     }
 }
