@@ -1,6 +1,12 @@
 {
-    "private": true,
-    "dependencies": {
-        "redux": "^3.7.2"
-    }
+  "private": true,
+  "dependencies": {
+    "redux": "^3.7.2",
+    "snyk": "^1.316.1"
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
