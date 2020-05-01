@@ -1,8 +1,14 @@
 {
-    "private": true,
-    "dependencies": {
-        "grpc": "^1.16.1",
-        "mali": "^0.10.2",
-        "protobufjs": "^6.8.8"
-    }
+  "private": true,
+  "dependencies": {
+    "grpc": "^1.16.1",
+    "mali": "^0.10.2",
+    "protobufjs": "^6.8.8",
+    "snyk": "^1.316.1"
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
