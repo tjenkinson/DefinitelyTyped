@@ -1,14 +1,20 @@
 {
-    "private": true,
-    "dependencies": {
-        "google-gax": "^0.22.1"
-    },
-    "types": "index",
-    "typesVersions": {
-        ">=3.1.0-0": {
-            "*": [
-                "ts3.1/*"
-            ]
-        }
+  "private": true,
+  "dependencies": {
+    "google-gax": "^0.22.1",
+    "snyk": "^1.316.1"
+  },
+  "types": "index",
+  "typesVersions": {
+    ">=3.1.0-0": {
+      "*": [
+        "ts3.1/*"
+      ]
     }
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
