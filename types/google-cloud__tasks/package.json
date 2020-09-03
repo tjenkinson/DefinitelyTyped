@@ -1,7 +1,7 @@
 {
     "private": true,
     "dependencies": {
-        "google-gax": "^0.22.1"
+        "google-gax": "^2.0.1"
     },
     "types": "index",
     "typesVersions": {
