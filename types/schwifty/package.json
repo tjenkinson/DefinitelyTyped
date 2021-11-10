@@ -2,6 +2,6 @@
     "private": true,
     "dependencies": {
         "knex": "^0.16.1",
-        "objection": "^1.1.9"
+        "objection": "^3.0.0"
     }
 }
