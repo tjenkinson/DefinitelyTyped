@@ -1,16 +1,17 @@
-import { ComponentType, HTMLProps, ReactNode } from '@wordpress/element';
+import { ComponentType, HTMLProps, ReactNode, ReactElement, FocusEvent } from 'react';
+import { Slot } from '@wordpress/components';
 
 declare namespace Popover {
     interface Props extends HTMLProps<HTMLDivElement> {
         /**
          * A custom `DOMRect` object at which to position the popover.
          */
-        anchorRect?: DOMRect | ClientRect;
+        anchorRect?: DOMRect | ClientRect | undefined;
         /**
          * Should the popover have an animation?
          * @defaultValue true
          */
-        animate?: boolean;
+        animate?: boolean | undefined;
         /**
          * The content to be displayed within the popover.
          */
@@ -18,11 +19,11 @@ declare namespace Popover {
         /**
          * An optional additional class name to apply to the rendered popover.
          */
-        className?: string;
+        className?: string | undefined;
         /**
          * Opt-in prop to show popovers fullscreen on mobile.
          */
-        expandOnMobile?: boolean;
+        expandOnMobile?: boolean | undefined;
         /**
          * By default, the first tabblable element in the popover will receive
          * focus when it mounts. This is the same as setting focusOnMount to
@@ -35,24 +36,24 @@ declare namespace Popover {
          *
          * @defaultValue "firstElement"
          */
-        focusOnMount?: 'firstElement' | 'container' | false;
+        focusOnMount?: 'firstElement' | 'container' | false | undefined;
         /**
          * Set this to customize the text that is shown in popover's header
          * when it is fullscreen on mobile.
          */
-        headerTitle?: string;
+        headerTitle?: string | undefined;
         /**
          * Set this to hide the arrow which visually indicates what the popover
          * is anchored to. Note that the arrow will not display if `position` is
          * set to `"middle center"`.
          */
-        noArrow?: boolean;
+        noArrow?: boolean | undefined;
         /**
          * The direction in which the popover should open relative to its
          * parent node. Specify y- and x-axis as a space-separated string.
          * @defaultValue "top center"
          */
-        position?: Position;
+        position?: Position | undefined;
         /**
          * Function that should return a `DOMRect` of where to position the
          * popover.
@@ -66,9 +67,21 @@ declare namespace Popover {
          * A callback invoked when the user clicks outside the opened popover,
          * passing the click event. The popover should be closed in response to
          * this interaction.
-         * @defaultValue Props.onClose
+         *
+         * @deprecated  use `onFocusOutside`
          */
         onClickOutside?(): void;
+
+        /**
+         * A callback invoked when the focus leaves the opened popover. This
+         * should only be provided in advanced use-cases when a Popover should
+         * close under specific circumstances; for example, if the new
+         * `document.activeElement` is content of or otherwise controlling
+         * Popover visibility.
+         *
+         * Defaults to `onClose` when not provided.
+         */
+        onFocusOutside?(event: FocusEvent): void;
     }
     /**
      * The direction in which the popover should open relative to its parent
@@ -85,6 +98,29 @@ declare namespace Popover {
         | 'bottom right'
         | 'bottom center';
 }
-declare const Popover: ComponentType<Popover.Props>;
+
+declare const Popover: ComponentType<Popover.Props> & {
+    /**
+     * Use Popover.Slot to render the Popover to a specific location on the page.
+     *
+     * This is useful to allow style cascade to take effect.
+     *
+     * @example
+     *
+     * import { render } from 'react';
+     * import { Popover } from '@wordpress/components';
+     * import Content from './Content';
+     *
+     * const app = document.getElementById( 'app' );
+     * render(
+     *   <div>
+     *       <Content />
+     *       <Popover.Slot />
+     *   </div>,
+     *   app
+     * );
+     */
+    Slot(): ReactElement<Slot.Props, typeof Slot>;
+};
 
 export default Popover;

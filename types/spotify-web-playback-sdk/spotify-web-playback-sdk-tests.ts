@@ -11,6 +11,8 @@ const player = new window.Spotify.Player({
     },
     volume: 0.5
 });
+// https://developer.spotify.com/documentation/web-playback-sdk/reference/#playing-a-spotify-uri
+const {id: device_id} = player._options;
 
 player.connect().then((success: boolean) => {
     if (success) {
@@ -32,6 +34,10 @@ player.getCurrentState().then((playbackState: Spotify.PlaybackState | null) => {
     if (playbackState) {
         const { current_track, next_tracks } = playbackState.track_window;
         const repeatMode: 0 | 1 | 2 = playbackState.repeat_mode;
+        const images = current_track.album.images;
+        if (images.length) {
+            const { 0: { height, width } } = images;
+        }
 
         console.log("Currently Playing", current_track);
         console.log("Playing Next", next_tracks[0]);

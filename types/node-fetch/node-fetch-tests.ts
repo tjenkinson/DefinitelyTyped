@@ -65,7 +65,8 @@ function test_fetchUrlWithRequestObject() {
                 capture?: boolean
             }) => undefined,
 
-            dispatchEvent: (event: any) => false
+            dispatchEvent: (event: any) => false,
+            onabort: null,
         }
     };
     const request: Request = new Request(
@@ -82,6 +83,19 @@ function test_fetchUrlWithRequestObject() {
 
 function test_fetchUrlObject() {
     handlePromise(fetch(new URL("https://example.org")));
+}
+
+async function test_responseReturnTypes() {
+    const response = await fetch(new URL("https://example.org"));
+
+    // $ExpectType Blob
+    const blob = await response.clone().blob();
+
+    // $ExpectType string
+    const text = await response.clone().text();
+
+    // $ExpectType Buffer
+    const buffer = await response.clone().buffer();
 }
 
 function test_fetchUrlObjectWithRequestObject() {
@@ -103,7 +117,8 @@ function test_fetchUrlObjectWithRequestObject() {
                 capture?: boolean
             }) => undefined,
 
-            dispatchEvent: (event: any) => false
+            dispatchEvent: (event: any) => false,
+            onabort: null,
         }
     };
     const request: Request = new Request(
@@ -146,10 +161,15 @@ function handlePromise(
         });
 }
 
-function test_headersRaw() {
+function test_headers() {
     const headers = new Headers();
     const myHeader = "foo";
     headers.raw()[myHeader]; // $ExpectType string[]
+
+    [...headers]; // $ExpectType [string, string][]
+    [...headers.entries()]; // $ExpectType [string, string][]
+    [...headers.keys()]; // $ExpectType string[]
+    [...headers.values()]; // $ExpectType [string][]
 }
 
 function test_isRedirect() {
@@ -158,7 +178,15 @@ function test_isRedirect() {
 }
 
 function test_FetchError() {
-    new FetchError("message", "type", "systemError");
+    new FetchError("message", "type", {
+        name: 'Error',
+        message: 'Error message',
+        code: "systemError",
+    });
+    new FetchError("message", "type", {
+        name: 'Error',
+        message: "Error without code",
+    });
     new FetchError("message", "type");
 }
 
@@ -181,4 +209,8 @@ function test_ResponseInit() {
             timeout: response.timeout
         });
     });
+}
+
+async function test_BlobText() {
+    const someString = await new Blob(["Hello world"]).text(); // $ExpectType string
 }

@@ -43,7 +43,7 @@ export interface CanvasRenderingContext2D {
     font: string;
     globalAlpha: number;
     globalCompositionOperation: string;
-    linecap: string;
+    lineCap: string;
     lineDashOffset: number;
     lineJoin: string;
     lineWidth: number;
@@ -54,6 +54,7 @@ export interface CanvasRenderingContext2D {
     shadowOffsetY: number;
     strokeStyle: string;
     textAlign: string;
+    textBaseline: string;
     arc: (x: number, y: number, r: number, sAngle: number, eAngle: number, counterClockwise?: boolean) => void;
     arcTo: (x1: number, y1: number, x2: number, y2: number, r: number) => void;
     beginPath: () => void;
@@ -121,7 +122,7 @@ export interface CanvasRenderingContext2D {
     scale: (x: number, y: number) => void;
     setLineDash: (segments: number[]) => void;
     setTransform: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-    stroke: (path: Path2D) => void;
+    stroke: (path?: Path2D) => void;
     strokeRect: (x: number, y: number, width: number, height: number) => void;
     strokeText: (text: string, x: number, y: number, maxWidth?: number) => void;
     transform: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
@@ -131,7 +132,7 @@ export interface CanvasRenderingContext2D {
 export default class Canvas extends React.Component<CanvasProps> {
     width: number;
     height: number;
-    toDataURL: () => string;
+    toDataURL: (type?: string, encoderOptions?: number) => Promise<string>;
     getContext: (context: string) => CanvasRenderingContext2D;
 }
 

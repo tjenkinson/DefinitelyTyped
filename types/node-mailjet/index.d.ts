@@ -1,6 +1,8 @@
 // Type definitions for node-mailjet 3.3
 // Project: https://github.com/mailjet/mailjet-apiv3-nodejs
 // Definitions by: Nikola Andreev <https://github.com/Nikola-Andreev>
+//                Jordan Garvey <https://github.com/jordangarvey>
+//                 Philipp Katz <https://github.com/qqilihq>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.2
 
@@ -27,16 +29,16 @@ export interface ConfigOptions {
 // *** Email API interfaces *** //
 export namespace Email {
     interface Client {
-        get(action: string): GetResource;
+        get(action: string, options?: ConfigOptions): GetResource;
 
-        put(action: string): PutResource;
+        put(action: string, options?: ConfigOptions): PutResource;
 
         post(action: string, options?: ConfigOptions): PostResource;
     }
 
     // resources
     interface PostResource {
-        id(value: string): PostResource;
+        id(value: string | number): PostResource;
 
         action(action: string): PostResource;
 
@@ -46,7 +48,7 @@ export namespace Email {
     }
 
     interface GetResource {
-        id(value: string): GetResource;
+        id(value: string | number): GetResource;
 
         action(action: string): GetResource;
 
@@ -54,7 +56,7 @@ export namespace Email {
     }
 
     interface PutResource {
-        id(value: string): PutResource;
+        id(value: string | number): PutResource;
 
         request(params: object, callback?: (error: Error, res: PutResponse) => void): Promise<PutResponse>;
     }
@@ -85,21 +87,36 @@ export namespace Email {
     // other types
     interface SendParamsRecipient {
         Email: string;
-        Name: string;
+        Name?: string;
+    }
+
+    interface Attachment {
+        ContentType: string;
+        Filename: string;
+        Base64Content: string;
+    }
+
+    interface InlinedAttachment extends Attachment {
+        ContentID: string;
     }
 
     interface SendParamsMessage {
         From: {
-            Email: string
-            Name: string
+            Email: string;
+            Name?: string;
+        };
+        Sender?: {
+            Email: string;
+            Name?: string;
         };
         To: SendParamsRecipient[];
         Cc?: SendParamsRecipient[];
         Bcc?: SendParamsRecipient[];
+        ReplyTo?: SendParamsRecipient;
         Variables?: object;
         TemplateID?: number;
         TemplateLanguage?: boolean;
-        Subject: string;
+        Subject?: string;
         TextPart?: string;
         HTMLPart?: string;
         MonitoringCategory?: string;
@@ -109,17 +126,8 @@ export namespace Email {
         EventPayload?: string;
         CustomID?: string;
         Headers?: object;
-        Attachments?: [{
-            "ContentType": string
-            "Filename": string
-            "Base64Content": string
-        }];
-        InlinedAttachments?: [{
-            ContentType: string
-            Filename: string
-            ContentID: string
-            Base64Content: string
-        }];
+        Attachments?: Attachment[];
+        InlinedAttachments?: InlinedAttachment[];
     }
 
     interface PostResponseDataMessage {
@@ -164,7 +172,7 @@ export namespace SMS {
 
     // resources
     interface GetResource {
-        id(value: string): GetResource;
+        id(value: string | number): GetResource;
 
         action(action: string): GetResourceAction;
 
@@ -180,7 +188,7 @@ export namespace SMS {
     }
 
     interface GetResourceAction {
-        id(value: string): GetResourceActionId;
+        id(value: string | number): GetResourceActionId;
 
         request(params?: GetParams): Promise<GetResponseAction>;
     }

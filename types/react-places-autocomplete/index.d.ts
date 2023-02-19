@@ -4,10 +4,11 @@
 //                 Andrew Makarov <https://github.com/r3nya>
 //                 Nokky Goren <https://github.com/ApeNox>
 //                 Aziz Khambati <https://github.com/azizhk>
+//                 Mark Nelissen <https://github.com/marknelissen>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.8
+// TypeScript Version: 3.0
 //
-/// <reference types="googlemaps" />
+/// <reference types="google.maps" />
 import * as React from 'react';
 
 export type AutocompletePrediction = google.maps.places.AutocompletePrediction;
@@ -38,6 +39,7 @@ export interface PropTypes {
         location?: google.maps.LatLng | google.maps.LatLngLiteral;
         offset?: number | string;
         radius?: number | string;
+        sessionToken?: any;
         types?: string[];
     };
     debounce?: number;

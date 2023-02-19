@@ -6551,7 +6551,7 @@ declare module dijit {
      */
     class Calendar extends dijit.CalendarLite implements dijit._Widget, dijit._CssStateMixin {
         constructor(params?: Object, srcNodeRef?: HTMLElement);
-        		/**
+                /**
          * Custom press, release, and click synthetic events
          * which trigger on a left mouse click, touch, or space/enter keyup.
          * 

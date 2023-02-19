@@ -21,7 +21,7 @@ declare module 'leaflet' {
         /*
         * Zoom to the minimum of showing all of the child markers, or the extents of this cluster.
         */
-        zoomToBounds(): void;
+        zoomToBounds(options?: FitBoundsOptions): void;
 
         /*
         * Returns the cluster bounds.
@@ -107,6 +107,12 @@ declare module 'leaflet' {
         iconCreateFunction?: ((cluster: MarkerCluster) => Icon | DivIcon);
 
         /*
+        * Map pane where the cluster icons will be added.
+        * Defaults to L.Marker's default (currently 'markerPane')
+         */
+        clusterPane?: string;
+
+        /*
         * Boolean to split the addLayers processing in to small intervals so that the page does not freeze.
         */
         chunkedLoading?: boolean;
@@ -121,14 +127,23 @@ declare module 'leaflet' {
         * In particular, this prevents the page from freezing while adding a lot of markers. Defaults to 200ms.
         */
         chunkInterval?: number;
+
+        /*
+        * Callback function that is called at the end of each chunkInterval.
+        * Typically used to implement a progress indicator. Defaults to null.
+        */
+        chunkProgress?: (processedMarkers: number, totalMarkers: number, elapsedTime: number) => void;
     }
 
     class MarkerClusterGroup extends FeatureGroup {
+        constructor(options?: MarkerClusterGroupOptions);
+
         /*
         * Bulk methods for adding and removing markers and should be favoured over the
         * single versions when doing bulk addition/removal of markers.
         */
-        addLayers(layers: Layer[]): this;
+        addLayers(layers: Layer[], skipLayerAddEvent?: boolean): this;
+
         removeLayers(layers: Layer[]): this;
 
         clearLayers(): this;
@@ -143,7 +158,7 @@ declare module 'leaflet' {
         * If you have customized the clusters icon to use some data from the contained markers,
         * and later that data changes, use this method to force a refresh of the cluster icons.
         */
-        refreshClusters(clusters?: Marker | Marker[] | LayerGroup | {[index: string]: Layer}): this;
+        refreshClusters(clusters?: Marker | Marker[] | LayerGroup | { [index: string]: Layer }): this;
 
         /*
         * Returns the total number of markers contained within that cluster.

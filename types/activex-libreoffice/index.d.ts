@@ -23343,7 +23343,7 @@ declare namespace com.sun.star {
              * @param identifier extension identifier
              * @param fileName extension file name
              * @param xCmdEnv command environment for error and progress handling
-             * @returns {@link XPackage} object
+             * @returns object
              */
             getDeployedExtension(repository: string, identifier: string, fileName: string, xCmdEnv: ucb.XCommandEnvironment): XPackage;
 
@@ -23738,7 +23738,7 @@ declare namespace com.sun.star {
              * @param mediaType media-type of package, empty string if to be detected
              * @param xAbortChannel abort channel to asynchronously abort the adding process, or null
              * @param xCmdEnv command environment for error and progress handling
-             * @returns {@link XPackage} handle
+             * @returns handle
              */
             addPackage(url: string, properties: LibreOffice.SeqEquiv<beans.NamedValue>, mediaType: string, xAbortChannel: task.XAbortChannel, xCmdEnv: ucb.XCommandEnvironment): XPackage;
 
@@ -23773,7 +23773,7 @@ declare namespace com.sun.star {
              * @param identifier package identifier
              * @param fileName package file name
              * @param xCmdEnv command environment for error and progress handling
-             * @returns {@link XPackage} handle
+             * @returns handle
              */
             getDeployedPackage(identifier: string, fileName: string, xCmdEnv: ucb.XCommandEnvironment): XPackage;
 
@@ -23809,7 +23809,7 @@ declare namespace com.sun.star {
              * @param extension
              * @param xAbortChannel abort channel to asynchronously abort the adding process, or null
              * @param xCmdEnv command environment for error and progress handling
-             * @returns {@link XPackage} handle
+             * @returns handle
              */
             importExtension(extension: XPackage, xAbortChannel: task.XAbortChannel, xCmdEnv: ucb.XCommandEnvironment): XPackage;
 
@@ -23875,7 +23875,7 @@ declare namespace com.sun.star {
              *
              * Context strings other than `"user"` , `"shared"` will last in an {@link com.sun.star.lang.IllegalArgumentException} .
              * @param context context string, e.g. `"user"` => persistent storage and registration into installation's user layer`"shared"` => persistent storage and r
-             * @returns {@link XPackageManager} object
+             * @returns object
              * @throws com::sun::star::lang::IllegalArgumentException in case of an invalid context
              */
             getPackageManager(context: string): XPackageManager;
@@ -23910,7 +23910,7 @@ declare namespace com.sun.star {
              * @param removed
              * @param identifier the identifier of the extension
              * @param xCmdEnv command environment for error and progress handling
-             * @returns {@link XPackage} handle
+             * @returns handle
              */
             bindPackage(url: string, mediaType: string, removed: boolean, identifier: string, xCmdEnv: ucb.XCommandEnvironment): XPackage;
 
@@ -32622,7 +32622,7 @@ declare namespace com.sun.star {
              * In case the entry exists already all its contents will be ignored and rewritten on storing of the object.
              * @param xStorage a parent storage the entry should be created or opened in
              * @param sEntryName a name for the entry
-             * @param aArgs {@link com.sun.star.document.MediaDescriptor} the link will be based on
+             * @param aArgs The {@link com.sun.star.document.MediaDescriptor} the link will be based on
              * @param aObjectArgs optional parameters for the object persistence initialization, see also {@link com.sun.star.embed.EmbeddedObjectDescriptor}
              * @throws com::sun::star::lang::IllegalArgumentException the argument is illegal
              * @throws com::sun::star::io::IOException in case of io problems during opening or creation
@@ -32641,7 +32641,7 @@ declare namespace com.sun.star {
              * @param ClassName the class name of the new object
              * @param xStorage a parent storage the entry should be created in
              * @param sEntryName a name for the entry
-             * @param aArgs {@link com.sun.star.document.MediaDescriptor} that contains source for the link
+             * @param aArgs The {@link com.sun.star.document.MediaDescriptor} that contains source for the link
              * @param aObjectArgs optional parameters for the object persistence initialization see also {@link com.sun.star.embed.EmbeddedObjectDescriptor}
              * @throws com::sun::star::lang::IllegalArgumentException one of arguments is illegal
              * @throws com::sun::star::io::IOException in case of io problems during opening or creation
@@ -33197,13 +33197,13 @@ declare namespace com.sun.star {
         interface XTransferableSupplier extends uno.XInterface {
             /**
              * allows to get access to {@link com.sun.star.datatransfer.XTransferable} implementation.
-             * @returns {@link com.sun.star.datatransfer.XTransferable} implementation
+             * @returns implementation
              */
             getTransferable(): datatransfer.XTransferable;
 
             /**
              * allows to get access to {@link com.sun.star.datatransfer.XTransferable} implementation.
-             * @returns {@link com.sun.star.datatransfer.XTransferable} implementation
+             * @returns implementation
              */
             readonly Transferable: datatransfer.XTransferable;
         }
@@ -38070,13 +38070,13 @@ declare namespace com.sun.star {
 
             /**
              * allows to get current border sizes of the document.
-             * @returns {@link BorderWidths} representing the sizes of border
+             * @returns representing the sizes of border
              */
             readonly Border: BorderWidths;
 
             /**
              * allows to get current border sizes of the document.
-             * @returns {@link BorderWidths} representing the sizes of border
+             * @returns representing the sizes of border
              */
             getBorder(): BorderWidths;
 
@@ -40846,7 +40846,7 @@ declare namespace com.sun.star {
             /**
              * creates a new Gallery theme and adds it to the collection.
              * @param ThemeName The name of the Gallery theme to be added to the collection. The name must be unique.
-             * @returns {@link XGalleryTheme} The created theme interface
+             * @returns The created theme interface
              * @see com.sun.star.container.ElementExistException
              */
             insertNewByName(ThemeName: string): XGalleryTheme;
@@ -41488,7 +41488,7 @@ declare namespace com.sun.star {
              * @param ShearAngle_X The horizontal shear angle of the graphic to be rasterized. This parameter is used without taking other transformation values into a
              * @param ShearAngle_Y The vertical shear angle of the graphic to be rasterized. This parameter is used without taking other transformation values into acc
              * @param RasterizeProperties Additional properties for special needs (undefined by now)
-             * @returns {@link com.sun.star.graphic.XGraphic} An interface to a graphic container that holds the rasterized pixel data
+             * @returns An interface to a graphic container that holds the rasterized pixel data
              * @see com.sun.star.beans.PropertyValues
              * @see com.sun.star.graphic.XGraphic
              */
@@ -43192,7 +43192,7 @@ declare namespace com.sun.star {
              * @param Locale Locale the conversion is referring to.
              * @param nTextConversionType One of {@link TextConversionType} values.
              * @param nTextConversionOptions Combination of {@link TextConversionOption} values.
-             * @returns {@link TextConversionResult}
+             * @returns
              * @throws NoSupportException when **nConversionDictionaryType** is not known by the implementation, or when the locale is not supported.
              */
             getConversions(aText: string, nStartPos: number, nLength: number, Locale: lang.Locale, nTextConversionType: number, nTextConversionOptions: number): TextConversionResult;
@@ -51165,7 +51165,7 @@ declare namespace com.sun.star {
              * This method adds a listener to the slide show, which will get notified when a mouse click is performed on the given shape. This can be used by clients
              * of the slide show to trigger external actions, such as jumps to different slides.
              * @param xListener Listener to add.
-             * @param xShape {@link Shape} to register a listener for.
+             * @param xShape The {@link Shape} to register a listener for.
              */
             addShapeEventListener(xListener: XShapeEventListener, xShape: drawing.XShape): void;
 
@@ -51252,7 +51252,7 @@ declare namespace com.sun.star {
             /**
              * Revoke a previously registered shape event listener.
              * @param xListener Listener interface to revoke from being called.
-             * @param xShape {@link Shape} for which the listener should be revoked.
+             * @param xShape for which the listener should be revoked.
              */
             removeShapeEventListener(xListener: XShapeEventListener, xShape: drawing.XShape): void;
 
@@ -51281,7 +51281,7 @@ declare namespace com.sun.star {
              * Set a special mouse cursor for a shape.
              *
              * This method requests the slide show to display a special cursor, whenever the mouse is hovering over the given shape.
-             * @param xShape {@link Shape} to display a special mouse cursor.
+             * @param xShape The {@link Shape} to display a special mouse cursor.
              * @param nPointerShape Type of mouse cursor to display. Must be one of the {@link com.sun.star.awt.SystemPointer} values.
              */
             setShapeCursor(xShape: drawing.XShape, nPointerShape: number): void;
@@ -55681,7 +55681,7 @@ declare namespace com.sun.star {
              * This method copies a rectangular area from a place of one canvas to a place on another. Source and destination areas are permitted to overlap. If the
              * source view or render state has a clipping set, the regions clipped away from the source rectangle are regarded fully transparent for the copy
              * operation. The device color for both source and destination render state is ignored, the compositing mode only for the source render state.
-             * @param sourceCanvas {@link Canvas} from which to copy the bitmap data. Can be identical to the canvas this method is called on, but must be valid.
+             * @param sourceCanvas from which to copy the bitmap data. Can be identical to the canvas this method is called on, but must be valid.
              * @param sourceRect Rectangle from which to copy the bitmap data. This rectangle is subject to both view and render transformation, before being applied.
              * @param sourceViewState The view state to apply to the source of this copy operation. The view transformation must be non-singular.
              * @param sourceRenderState The render state to apply to the source of this copy operation. The render transformation must be non-singular, and the composi
@@ -61328,13 +61328,13 @@ declare namespace com.sun.star {
             interface XBrowseNode extends uno.XInterface {
                 /**
                  * Get the children of this node
-                 * @returns {@link com.sun.star.script.browse.XBrowseNode} sequence of child nodes
+                 * @returns sequence of child nodes
                  */
                 readonly ChildNodes: SafeArray<XBrowseNode>;
 
                 /**
                  * Get the children of this node
-                 * @returns {@link com.sun.star.script.browse.XBrowseNode} sequence of child nodes
+                 * @returns sequence of child nodes
                  */
                 getChildNodes(): SafeArray<XBrowseNode>;
 
@@ -61517,37 +61517,37 @@ declare namespace com.sun.star {
             interface XScriptContext extends uno.XInterface {
                 /**
                  * Obtain the component context which the script can use to create other uno components
-                 * @returns {@link com.sun.star.uno.XComponentContext} interface
+                 * @returns interface
                  */
                 readonly ComponentContext: uno.XComponentContext;
 
                 /**
                  * Obtain the desktop reference on which the script can operate
-                 * @returns {@link com.sun.star.frame.XDesktop} interface
+                 * @returns interface
                  */
                 readonly Desktop: frame.XDesktop;
 
                 /**
                  * Obtain the document reference on which the script can operate
-                 * @returns {@link com.sun.star.frame.XModel} interface
+                 * @returns interface
                  */
                 readonly Document: frame.XModel;
 
                 /**
                  * Obtain the component context which the script can use to create other uno components
-                 * @returns {@link com.sun.star.uno.XComponentContext} interface
+                 * @returns interface
                  */
                 getComponentContext(): uno.XComponentContext;
 
                 /**
                  * Obtain the desktop reference on which the script can operate
-                 * @returns {@link com.sun.star.frame.XDesktop} interface
+                 * @returns interface
                  */
                 getDesktop(): frame.XDesktop;
 
                 /**
                  * Obtain the document reference on which the script can operate
-                 * @returns {@link com.sun.star.frame.XModel} interface
+                 * @returns interface
                  */
                 getDocument(): frame.XModel;
 
@@ -76168,7 +76168,7 @@ declare namespace com.sun.star {
 
             /**
              * This method returns a different output range of a DataPilot table per specified output range type.
-             * @returns {@link com.sun.star.table.CellRangeAddress} depicting the range specified. See {@link DataPilotOutputRangeType} for a set of possible output rang
+             * @returns depicting the range specified. See {@link DataPilotOutputRangeType} for a set of possible output rang
              * @see com.sun.star.sheet.DataPilotOutputRangeType
              */
             getOutputRangeByType(nType: number): table.CellRangeAddress;
@@ -76177,7 +76177,7 @@ declare namespace com.sun.star {
              * Given a cell address, it returns the information about that cell. The type of information returned depends upon whether the cell is within the result
              * area or column/row header area.
              * @param aAddr address of the cell whose information is to be returned.
-             * @returns {@link DataPilotTablePositionData} which contains the position type and the information for that cell position.
+             * @returns which contains the position type and the information for that cell position.
              * @see com.sun.star.sheet.DataPilotTablePositionData
              * @see com.sun.star.sheet.DataPilotTableHeaderData
              * @see com.sun.star.sheet.DataPilotTableResultData
@@ -76396,7 +76396,7 @@ declare namespace com.sun.star {
              * Note that a sheet name lookup is performed in a case-insensitive fashion.
              * @param aSheetName sheet name
              * @param DynamicCache specify whether or not the cache can grow when non-cached regions are queried. If `TRUE` , querying a non-cached cell in this sheet
-             * @returns {@link com.sun.star.sheet.XExternalSheetCache} sheet cache instance
+             * @returns sheet cache instance
              */
             addSheetCache(aSheetName: string, DynamicCache: boolean): XExternalSheetCache;
 
@@ -76425,7 +76425,7 @@ declare namespace com.sun.star {
              * This method adds a new external document link by its URL, and returns its instance. If a document instance already exists for the specified URL, then
              * that instance gets returned instead of creating a new one.
              * @param aDocName document URL (e.g. [file:///path/to/document.ods]{@link url="file:///path/to/document.ods"} )
-             * @returns {@link com.sun.star.sheet.XExternalDocLink} external document link instance
+             * @returns external document link instance
              */
             addDocLink(aDocName: string): XExternalDocLink;
         }
@@ -87034,10 +87034,10 @@ declare namespace com.sun.star {
 
         /** makes it possible to access the {@link FootnoteSettings} within the context (e.g. document). */
         interface XEndnotesSettingsSupplier extends uno.XInterface {
-            /** @returns {@link EndnoteSettings} of the object. */
+            /** @returns The {@link EndnoteSettings} of the object. */
             readonly EndnotesSettings: beans.XPropertySet;
 
-            /** @returns {@link EndnoteSettings} of the object. */
+            /** @returns The {@link EndnoteSettings} of the object. */
             getEndnotesSettings(): beans.XPropertySet;
         }
 
@@ -87239,10 +87239,10 @@ declare namespace com.sun.star {
 
         /** makes it possible to access the {@link FootnoteSettings} with the context (e.g. document). */
         interface XFootnotesSettingsSupplier extends uno.XInterface {
-            /** @returns {@link FootnoteSettings} of the object. */
+            /** @returns The {@link FootnoteSettings} of the object. */
             readonly FootnotesSettings: beans.XPropertySet;
 
-            /** @returns {@link FootnoteSettings} of the object. */
+            /** @returns The {@link FootnoteSettings} of the object. */
             getFootnotesSettings(): beans.XPropertySet;
         }
 
@@ -92998,7 +92998,7 @@ declare namespace com.sun.star {
              * @param nRowStartPosition the starting row of the result set
              * @param nRowCount the count of rows
              * @param bDirection `TRUE` , if you want the rows to be read in the same order, as they are contained in the result set ( `TRUE` <-> forward step; `FALSE`
-             * @returns {@link FetchResult.Rows} contains a sequence of anys. Each of these anys contains a sequence of anys.
+             * @returns contains a sequence of anys. Each of these anys contains a sequence of anys.
              */
             fetch(nRowStartPosition: number, nRowCount: number, bDirection: boolean): FetchResult;
         }
@@ -93013,7 +93013,7 @@ declare namespace com.sun.star {
              * @param nRowStartPosition the starting row of the result set
              * @param nRowCount the count of rows
              * @param bDirection `TRUE` , if you want the rows to be read in the same order, as they are contained in the result set ( `TRUE` <-> forward step; `FALSE`
-             * @returns {@link FetchResult.Rows} contains a sequence of anys. Each of these anys contains an {@link XContentIdentifier} .
+             * @returns contains a sequence of anys. Each of these anys contains an {@link XContentIdentifier} .
              */
             fetchContentIdentifiers(nRowStartPosition: number, nRowCount: number, bDirection: boolean): FetchResult;
 
@@ -93022,7 +93022,7 @@ declare namespace com.sun.star {
              * @param nRowStartPosition the starting row of the result set
              * @param nRowCount the count of rows
              * @param bDirection `TRUE` , if you want the rows to be read in the same order, as they are contained in the result set ( `TRUE` <-> forward step; `FALSE`
-             * @returns {@link FetchResult.Rows} contains a sequence of anys. Each of these anys contains a string.
+             * @returns contains a sequence of anys. Each of these anys contains a string.
              */
             fetchContentIdentifierStrings(nRowStartPosition: number, nRowCount: number, bDirection: boolean): FetchResult;
 
@@ -93031,7 +93031,7 @@ declare namespace com.sun.star {
              * @param nRowStartPosition the starting row of the result set
              * @param nRowCount the count of rows
              * @param bDirection `TRUE` , if you want the rows to be read in the same order, as they are contained in the result set ( `TRUE` <-> forward step; `FALSE`
-             * @returns {@link FetchResult.Rows} contains a sequence of anys. Each of these anys contains an {@link XContent} .
+             * @returns contains a sequence of anys. Each of these anys contains an {@link XContent} .
              */
             fetchContents(nRowStartPosition: number, nRowCount: number, bDirection: boolean): FetchResult;
         }
@@ -93532,7 +93532,7 @@ declare namespace com.sun.star {
             /**
              * Returns the content type of a file.
              * @param FileURL URL of the file
-             * @returns {@link Content} type of the file
+             * @returns The {@link Content} type of the file
              * @see XContent.getContentType
              */
             getContentType(FileURL: string): string;
@@ -99483,7 +99483,7 @@ declare namespace com.sun.star {
              *
              * Sometimes it can be useful to show an {@link URL} on an user interface in a more "human readable" form. Such {@link URL} can't be used on any API
              * call, but make it easier for the user to understand it.
-             * @param aURL {@link URL} in structured form which should be shown at the UI
+             * @param aURL in structured form which should be shown at the UI
              * @param bWithPassword specifies whether the password will be included in the encoding or not. Usually passwords should never be shown at the user interface.
              * @returns a string representing the **aURL** if it is syntactically correct. A empty string if **aURL** is not syntactically correct.
              */
@@ -100689,7 +100689,7 @@ declare namespace com.sun.star {
              *
              * The source data (location indicated by **aSourceData** ), and the XML representation of the document must be generated by calls to xocHandler (???)
              * methods.
-             * @param aSourceData {@link com.sun.star.document.MediaDescriptor} which defines the data source
+             * @param aSourceData the {@link com.sun.star.document.MediaDescriptor} which defines the data source
              * @param msUserData Sequence of strings which contains the user data defined in the TypeDetection.xml (???)
              * @returns `TRUE` if import process is successful
              */
@@ -100706,7 +100706,7 @@ declare namespace com.sun.star {
              *
              * The source data (location indicated by **aSourceData** ), and the XML representation of the document must be generated by calls to xocHandler (???)
              * methods.
-             * @param aSourceData {@link com.sun.star.document.MediaDescriptor} which defines the data source
+             * @param aSourceData the {@link com.sun.star.document.MediaDescriptor} which defines the data source
              * @param msUserData Sequence of strings which contains the user data defined in the TypeDetection.xml
              * @param xDocHandler target for the XML document representation
              * @returns `TRUE` if import process is successful
@@ -102912,7 +102912,7 @@ declare namespace com.sun.star {
              * modify or reimplement this behavior.
              */
             interface XEntityResolver extends uno.XInterface {
-                /** @returns {@link InputSource} for the external entity.  If **aInputStream** is a valid reference to an input stream, the parser uses this {@link InputSourc */
+                /** @returns for the external entity.  If **aInputStream** is a valid reference to an input stream, the parser uses this {@link InputSourc */
                 resolveEntity(sPublicId: string, sSystemId: string): InputSource;
             }
 

@@ -12,7 +12,14 @@ export import messages = messages;
 
 export type HTMLMediaElement = any;
 export as namespace framework;
-export type LoggerLevel = 'DEBUG' | 'VERBOSE' | 'INFO' | 'WARNING' | 'ERROR' | 'NONE';
+export enum LoggerLevel {
+    DEBUG = 0,
+    VERBOSE = 500,
+    INFO = 800,
+    WARNING = 900,
+    ERROR = 1000,
+    NONE = 1500,
+}
 
 export enum ContentProtection {
     NONE = 'none',
@@ -22,6 +29,11 @@ export enum ContentProtection {
     AES_128 = 'aes_128',
     AES_128_CKP = 'aes_128_ckp',
 }
+
+/**
+ * Version of CAF receiver SDK.
+ */
+export const VERSION: string;
 
 /**
  * Manages text tracks.
@@ -180,6 +192,47 @@ export class QueueBase {
      * Shuffles the queue and returns new queue items. Returns null if the operation is not supported.
      */
     shuffle(): messages.QueueItem[] | Promise<messages.QueueItem[]>;
+}
+
+// So we can have some auxiliary private types.
+export {};
+type MessageInterceptor<MessageType> =
+    | ((data: MessageType) => MessageType | messages.ErrorData)
+    | ((data: MessageType) => Promise<MessageType | messages.ErrorData>)
+    | ((data: MessageType) => null)
+    | null;
+
+interface MessageEventToMessageTypeMap {
+    [messages.MessageType.CLOUD_STATUS]: messages.CloudMediaStatus;
+    [messages.MessageType.CUSTOM_COMMAND]: messages.CustomCommandRequestData;
+    [messages.MessageType.DISPLAY_STATUS]: messages.DisplayStatusRequestData;
+    [messages.MessageType.EDIT_AUDIO_TRACKS]: messages.EditAudioTracksRequestData;
+    [messages.MessageType.EDIT_TRACKS_INFO]: messages.EditTracksInfoRequestData;
+    [messages.MessageType.FOCUS_STATE]: messages.FocusStateRequestData;
+    [messages.MessageType.GET_STATUS]: messages.GetStatusRequestData;
+    [messages.MessageType.LOAD]: messages.LoadRequestData;
+    [messages.MessageType.LOAD_BY_ENTITY]: messages.LoadByEntityRequestData;
+    [messages.MessageType.MEDIA_STATUS]: messages.MediaStatus;
+    [messages.MessageType.PRECACHE]: messages.PrecacheRequestData;
+    [messages.MessageType.PRELOAD]: messages.PreloadRequestData;
+    [messages.MessageType.QUEUE_CHANGE]: messages.QueueChange;
+    [messages.MessageType.QUEUE_GET_ITEMS]: messages.GetItemsInfoRequestData;
+    [messages.MessageType.QUEUE_GET_ITEM_RANGE]: messages.FetchItemsRequestData;
+    [messages.MessageType.QUEUE_INSERT]: messages.QueueInsertRequestData;
+    [messages.MessageType.QUEUE_ITEMS]: messages.ItemsInfo;
+    [messages.MessageType.QUEUE_ITEM_IDS]: messages.QueueIds;
+    [messages.MessageType.QUEUE_LOAD]: messages.QueueLoadRequestData;
+    [messages.MessageType.QUEUE_REMOVE]: messages.QueueRemoveRequestData;
+    [messages.MessageType.QUEUE_REORDER]: messages.QueueReorderRequestData;
+    [messages.MessageType.QUEUE_UPDATE]: messages.QueueUpdateRequestData;
+    [messages.MessageType.RESUME_SESSION]: messages.ResumeSessionRequestData;
+    [messages.MessageType.SEEK]: messages.SeekRequestData;
+    [messages.MessageType.SESSION_STATE]: messages.StoreSessionRequestData;
+    [messages.MessageType.SET_CREDENTIALS]: messages.SetCredentialsRequestData;
+    [messages.MessageType.SET_PLAYBACK_RATE]: messages.SetPlaybackRateRequestData;
+    [messages.MessageType.SET_VOLUME]: messages.VolumeRequestData;
+    [messages.MessageType.STORE_SESSION]: messages.StoreSessionRequestData;
+    [messages.MessageType.USER_ACTION]: messages.UserActionRequestData;
 }
 
 /**
@@ -644,16 +697,18 @@ export class PlayerManager {
     setMediaUrlResolver(resolver: (loadRequestData: messages.LoadRequestData) => void): void;
 
     /**
-     * Provide an interceptor of incoming and outgoing messages.
-     * The interceptor can update the request data; and return updated data; a promise of
-     * updated data if need to get more data from the server; or null if the request should not be handled.
-     * Note that if load message interceptor is provided; and no interceptor is provided for preload -
-     * the load interceptor will be called for preload messages.
+     * Provide an interceptor of incoming and outgoing messages. The interceptor
+     * can update the request data, and return updated data, a promise of
+     * updated data if need to get more data from the server, or null if the
+     * request should not be handled. Note that if load message interceptor is
+     * provided, and no interceptor is provided for preload - the load
+     * interceptor will be called for preload messages.
      */
-    setMessageInterceptor(
-        type: messages.MessageType,
-        interceptor: (requestData: messages.RequestData) => Promise<any>,
+    setMessageInterceptor<MessageEvent extends keyof MessageEventToMessageTypeMap>(
+        type: MessageEvent,
+        interceptor: MessageInterceptor<MessageEventToMessageTypeMap[MessageEvent]>,
     ): void;
+    setMessageInterceptor(type: messages.MessageType, interceptor: MessageInterceptor<messages.RequestData>): void;
 
     /**
      * Sets playback configuration on the PlayerManager.
@@ -671,6 +726,51 @@ export class PlayerManager {
      * by a load request or explicit change to text tracks. (Should be called only in idle state; and Will only apply to next loaded media).
      */
     setPreferredTextLanguage(preferredTextLanguage: string): void;
+
+    /**
+     * Set receiver supported media commands.
+     * Flags describing which media commands the media player supports:
+     * 1  Pause
+     * 2  Seek
+     * 4  Stream volume
+     * 8  Stream mute
+     * 16  Skip forward
+     * 32  Skip backward
+     * Combinations are described as summations; for example, Pause+Seek+StreamVolume+Mute == 15.
+     */
+    setSupportedMediaCommands(supportedMediaCommands: number, broadcastStatus?: boolean): void;
+
+    /**
+     * Remove commands from receiver supported media commands.
+     * @param supportedMediaCommands A bitmask of media commands supported by the application.
+     * @param broadcastStatus Whether the senders should be notified about the change (if not provided, the senders will be notified).
+     */
+    removeSupportedMediaCommands(supportedMediaCommands: number, broadcastStatus?: boolean): void;
+
+    /**
+     * Add commands to receiver supported media commands.
+     * @param supportedMediaCommands A bitmask of media commands supported by the application.
+     * @param broadcastStatus Whether the senders should be notified about the change (if not provided, the senders will be notified).
+     */
+    addSupportedMediaCommands(supportedMediaCommands: number, broadcastStatus?: boolean): void;
+
+    /**
+     * Gets the current receiver supported media commands.
+     * Should only be called after calling receiver start, otherwise it returns 0.
+     * This reflects the current media status. E.g. during ads playback, SEEK might not be supported.
+     *
+     * @returns A bitmask of media commands supported by the application.
+     */
+    getCurrentSupportedMediaCommands(): number;
+
+    /**
+     * Gets receiver supported media commands. Should only be called after calling receiver start, otherwise it returns 0.
+     * This is the static supported media commands set by receiver application.
+     * It won't be updated based on current media status.
+     *
+     * @returns A bitmask of media commands supported by the application.
+     */
+    getSupportedMediaCommands(): number;
 
     /**
      * Stops currently playing media.
@@ -876,12 +976,12 @@ export class CastReceiverContext {
     /**
      * Sets message listener on custom message channel.
      */
-    addCustomMessageListener(namespace: string, listener: EventHandler): void;
+    addCustomMessageListener(namespace: string, listener: SystemEventHandler): void;
 
     /**
      * Add listener to cast system events.
      */
-    addEventListener(type: system.EventType | system.EventType[], handler: EventHandler): void;
+    addEventListener(type: system.EventType | system.EventType[], handler: SystemEventHandler): void;
 
     /**
      * Checks if the given media params of video or audio streams are supported by the platform.
@@ -944,17 +1044,17 @@ export class CastReceiverContext {
     /**
      * Remove a message listener on custom message channel.
      */
-    removeCustomMessageListener(namespace: string, listener: EventHandler): void;
+    removeCustomMessageListener(namespace: string, listener: SystemEventHandler): void;
 
     /**
      * Remove listener to cast system events.
      */
-    removeEventListener(type: system.EventType, handler: EventHandler): void;
+    removeEventListener(type: system.EventType, handler: SystemEventHandler): void;
 
     /**
-     * Sends a message to a specific sender.
+     * Sends a message to a specific sender or broadcasts it to all connected senders (to broadcast pass undefined as a senderId).
      */
-    sendCustomMessage(namespace: string, senderId: string, message: any): void;
+    sendCustomMessage(namespace: string, senderId: string | undefined, message: any): void;
 
     /**
      * This function should be called in response to the feedbackstarted event if the application

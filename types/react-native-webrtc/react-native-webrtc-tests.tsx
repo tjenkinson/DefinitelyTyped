@@ -7,7 +7,8 @@ const {
     RTCIceCandidate,
     RTCSessionDescription,
     MediaStream,
-    RTCView
+    RTCView,
+    registerGlobals,
 } = WebRTC;
 
 mediaDevices.getUserMedia({
@@ -16,11 +17,11 @@ mediaDevices.getUserMedia({
         mandatory: {
             minWidth: 500,
             minHeight: 300,
-            minFrameRate: 30
+            minFrameRate: 30,
         },
         facingMode: "user",
-        optional: [{ sourceId: "" }]
-    }
+        optional: [{ sourceId: "" }],
+    },
 });
 
 mediaDevices.enumerateDevices();
@@ -36,13 +37,13 @@ const peer = new RTCPeerConnection({
         {
             username: "carlos",
             credential: "carlos90",
-            urls: [
-                "turn:coturn.workserver.xyz:3478?transport=udp",
-                "turn:coturn.workserver.xyz:3478?transport=tcp"
-            ]
-        }
+            urls: ["turn:coturn.workserver.xyz:3478?transport=udp", "turn:coturn.workserver.xyz:3478?transport=tcp"],
+        },
     ],
-    iceTransportPolicy: "all"
+    iceTransportPolicy: "all",
+    bundlePolicy: "balanced",
+    iceCandidatePoolSize: 10,
+    rtcpMuxPolicy: "require",
 });
 
 peer.onaddstream = () => {};
@@ -59,6 +60,6 @@ MediaStreamInit.toURL();
 
 peer.addStream(MediaStreamInit);
 
-export const VideoCall = () => (
-    <RTCView objectFit={"cover"} zOrder={0} style={{}} streamURL={""} />
-);
+registerGlobals();
+
+export const VideoCall = () => <RTCView objectFit={"cover"} zOrder={0} style={{}} streamURL={""} />;

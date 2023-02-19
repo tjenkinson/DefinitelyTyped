@@ -4,7 +4,6 @@
 //                 Ryan Blace <https://github.com/reblace>
 //                 Yun Shi <https://github.com/YunS-Stacy>
 //                 Kevin Richter <https://github.com/beschoenen>
-//                 Jeroen Claassens <https://github.com/favna>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.3
 
@@ -168,7 +167,7 @@ declare module 'leaflet' {
              *
              * Default value: null
              */
-            remove?: null | false;
+            remove?: boolean | null;
         }
 
         class Draw extends Control {
@@ -737,6 +736,11 @@ declare module 'leaflet' {
     }
 
     namespace GeometryUtil {
+        /**
+         * Shortcut function for planar distance between two {L.LatLng} at current zoom.
+         */
+        function distance(map: DrawMap, latlanA: LatLng, latlngB: LatLng): number;
+
         /**
          * Returns the area of a polygon drawn with leaflet.draw
          */

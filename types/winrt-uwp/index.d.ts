@@ -54592,6 +54592,256 @@ declare namespace Windows {
             /** Gets or sets the selection rectangle on the screen where the user opened a file or URI. */
             selectionRect: Windows.Foundation.Rect;
         }
+        /** Specifies the result of activating an application for a URI on a remote device. */
+        enum RemoteLaunchUriStatus {
+            /** The URI could not be successfully launched on the remote system. */
+            unknown,
+            /** The URI was successfully launched on the remote system. */
+            success,
+            /** The app is not installed on the remote system */
+            appUnavailable,
+            /** The application you are trying to activate on the remote system does not support this URI. */
+            protocolUnavailable,
+            /** The remote system could not be reached. */
+            remoteSystemUnavailable,
+            /** The amount of data you tried to send to the remote system exceeded the limit. */
+            valueSetTooLarge,
+            /** The user is not authorized to launch an app on the remote system. */
+            deniedByLocalSystem,
+            /** The user is not signed in on the target device or may be blocked by group policy. */
+            deniedByRemoteSystem
+        }
+        /** Specifies the options used to launch the default app for URI on a remote device. */
+        class RemoteLauncherOptions {
+            /** Creates an instance of the RemoteLauncherOptions class. */
+            constructor();
+            /** Specifies the URI of the web site to view if the app to handle the URI can't be launched on the remote device. */
+            FallbackUri: Windows.Foundation.Uri;
+            /** A list of package family names that should be used to launch the URI on the remote device. The first one in the list should be the preferred application to launch on the remote system (device). */
+            PreferredAppIds: Windows.Foundation.Collections.IIterable<string>;
+        }
+        /** Starts the default app associated with the specified URI on a remote device. */
+        abstract class RemoteLauncher {
+            /** Starts the default app associated with the URI scheme name for the specified URI on a remote device. */
+            static launchUriAsync(remoteSystemConnectionRequest: Windows.System.RemoteSystems.RemoteSystemConnectionRequest, uri: Windows.Foundation.Uri): Windows.Foundation.IPromiseWithIAsyncOperation<RemoteLaunchUriStatus>;
+            /** Starts the default app associated with the URI scheme name for the specified URI on a remote device, using the specified options. */
+            static launchUriAsync(remoteSystemConnectionRequest: Windows.System.RemoteSystems.RemoteSystemConnectionRequest, uri: Windows.Foundation.Uri, options: RemoteLauncherOptions): Windows.Foundation.IPromiseWithIAsyncOperation<RemoteLaunchUriStatus>;
+            /** Starts the default app associated with the URI scheme name for the specified URI on a remote device, using the specified options and input data. */
+            static launchUriAsync(remoteSystemConnectionRequest: Windows.System.RemoteSystems.RemoteSystemConnectionRequest, uri: Windows.Foundation.Uri, options: RemoteLauncherOptions, inputData: Windows.Foundation.Collections.ValueSet): Windows.Foundation.IPromiseWithIAsyncOperation<RemoteLaunchUriStatus>;
+        }
+        namespace RemoteSystems {
+            /** Contains the values that describe an app's access to use the Remote Systems feature. */
+            enum RemoteSystemAccessStatus {
+                /** Access is denied for an unknown reason. */
+                unspecified,
+                /** Access is allowed */
+                allowed,
+                /** Access has been denied to this particular app by this particular user. */
+                deniedByUser,
+                /** Access is denied to this app by the System; the app hasn't requested the proper capability. */
+                deniedBySystem
+            }
+            /** Contains the values that describe a remote system's availability status. */
+            enum RemoteSystemStatus {
+                /** The remote system is unavailable. */
+                unavailable,
+                /** The availability of the remote system is currently being discovered. */
+                discoveringAvailability,
+                /** The remote system is available. */
+                available,
+                /** The availability of the remote system is unknown. */
+                unknown
+            }
+            /** Contains values that describe the operating system platforms that a remote system could be running. */
+            enum RemoteSystemPlatform {
+                /** The OS platform is unknown. */
+                unknown,
+                /** The device is running Windows. */
+                windows,
+                /** The device is running Android. */
+                android,
+                /** The device is running iOS. */
+                ios,
+                /** The device is running Linux. */
+                linux
+            }
+            /** Contains values specifying whether the client device can discover only same-user devices or other users' devices as well. Cross-user devices must be available through a proximal connection in order to be discovered (see RemoteSystemDiscoveryType for details). */
+            enum RemoteSystemAuthorizationKind {
+                /** The client device can only discover devices signed in by the same user. */
+                sameUser,
+                /** The client device can discover other users' devices, provided they are available for proximal connection. */
+                anonymous
+            }
+            /** This is the argument class for the **RemoteSystemWatcher.EnumerationCompleted** event. */
+            abstract class RemoteSystemEnumerationCompletedEventArgs {
+            }
+            /** Contains values that describe a watcher error, which may stop discovery. */
+            enum RemoteSystemWatcherError {
+                /** Discovery stopped for an unknown reason. */
+                unknown,
+                /** Discovery of cloud remote systems failed because Internet connection was lost or is unavailable. */
+                internetNotAvailable,
+                /** Discovery of cloud remote systems for a web account failed because authentication of that web account failed. */
+                authenticationError
+            }
+            /** Gets information about an **ErrorOccurred** event, namely the **RemoteSystemWatcherError** value describing the error. */
+            abstract class RemoteSystemWatcherErrorOccurredEventArgs {
+                /** The **RemoteSystemWatcherError** value representing the error that occurred during discovery, causing the containing **ErrorOccurred** event to be raised. */
+                error: RemoteSystemWatcherError;
+            }
+            /** Gets information about a RemoteSystemAdded event, namely the RemoteSystem that was added. */
+            abstract class RemoteSystemAddedEventArgs {
+                /** The RemoteSystem object representing the device that was added to the set of discoverable devices, causing the containing RemoteSystemAdded event to be raised. */
+                remoteSystem: RemoteSystem;
+            }
+            /** Gets information about a RemoteSystemRemoved event, namely the RemoteSystem that was removed. */
+            abstract class RemoteSystemRemovedEventArgs {
+                /** The RemoteSystem object representing the device that was removed from the set of discoverable devices, causing the containing RemoteSystemRemoved event to be raised. */
+                remoteSystemId: string;
+            }
+            /** Gets information about a RemoteSystemUpdated event, namely the RemoteSystem that was updated. */
+            abstract class RemoteSystemUpdatedEventArgs {
+                /** The RemoteSystem object representing the device in the set of discoverable devices whose properties were updated, causing the containing RemoteSystemUpdated event to be raised. */
+                remoteSystem: RemoteSystem;
+            }
+            /** Watches for activity related to the discovery of remote systems and raises the appropriate events. */
+            abstract class RemoteSystemWatcher {
+                /** Starts watching for discoverable remote systems. The discovery process runs until the Stop method is called or an error occurs. A RemoteSystemWatcher object can have its Start method called again at a later time. */
+                start(): void;
+                /** Stops watching for discoverable remote systems. */
+                stop(): void;
+                /** This event is raised when the initial remote system discovery process completes. */
+                onenumerationcompleted: Windows.Foundation.TypedEventHandler<RemoteSystemWatcher, RemoteSystemEnumerationCompletedEventArgs>;
+                /** This event is raised when an error occurs during discovery. The discovery process will continue if possible. For example, if the error occurs with a value of RemoteSystemWatcherError.InternetNotAvailable (see **RemoteSystemWatcherError**), proximal discovery will continue because the error applies only to cloud discovery (see **RemoteSystemDiscoveryType**). */
+                onerroroccured: Windows.Foundation.TypedEventHandler<RemoteSystemWatcher, RemoteSystemWatcherErrorOccurredEventArgs>;
+                /** The event that is raised when a new remote system (device) is discovered. */
+                onremotesystemadded: Windows.Foundation.TypedEventHandler<RemoteSystemWatcher, RemoteSystemAddedEventArgs>;
+                /** The event that is raised when a previously discovered remote system (device) is no longer visible. */
+                onremotesystemremoved: Windows.Foundation.TypedEventHandler<RemoteSystemWatcher, RemoteSystemRemovedEventArgs>;
+                /** Raised when a remote system (device) that was previously discovered in this discovery session changes from proximally connected to cloud connected, or the reverse. It is also raised when a remote system changes one of its monitored properties (see the properties of the RemoteSystem class). */
+                onremotesystemupdated: Windows.Foundation.TypedEventHandler<RemoteSystemWatcher, RemoteSystemUpdatedEventArgs>;
+            }
+            /** Limits the set of remote systems that a RemoteSystemWatcher object can discover, according to a particular characterization. */
+            interface IRemoteSystemFilter {
+            }
+            /** Contains the values that describe how remote systems are able to be discovered. */
+            enum RemoteSystemDiscoveryType {
+                /** Remote systems are discoverable both through a proximal connection and through cloud connection. */
+                any,
+                /** Remote systems are only discoverable through a proximal connection, such as a local network or Bluetooth connection. */
+                proximal,
+                /** Remote systems are only discoverable through cloud connection. */
+                cloud,
+                /** Remote systems are discoverable through a proximal connection and are expected to be spatially near to the client device. */
+                spatiallyProximal
+            }
+            /** Contains read-only strings that identify various device types. */
+            abstract class RemoteSystemKinds {
+                /** Gets the string representation of the desktop device type. */
+                static desktop: string;
+                /** Gets the string representation of the holographic device type. */
+                static holographic: string;
+                /** Gets the string representation of the hub device type. */
+                static hub: string;
+                /** Gets the string representation of the Internet of Things (IoT) device type. */
+                static iot: string;
+                /** Gets the string representation of the laptop device type. */
+                static laptop: string;
+                /** Gets the string representation of the phone device type. */
+                static phone: string;
+                /** Gets the string representation of the tablet device type. */
+                static tablet: string;
+                /** Gets the string representation of the xbox device type. */
+                static xbox: string;
+            }
+            /** An IRemoteSystemFilter that limits the set of discoverable remote systems by allowing only those of a specific discovery type. */
+            class RemoteSystemDiscoveryTypeFilter implements IRemoteSystemFilter {
+                /** Initializes an instance of the RemoteSystemDiscoveryTypeFilter class. */
+                constructor(discoveryType: RemoteSystemDiscoveryType);
+                /** String representation(s) of the device type(s) that the containing RemoteSystemKindFilter object targets. */
+                remoteSystemKinds: Windows.Foundation.Collections.IVectorView<string>;
+            }
+            /** An IRemoteSystemFilter that limits the set of discoverable remote systems by allowing only those of specific device types. */
+            class RemoteSystemKindFilter implements IRemoteSystemFilter {
+                /** Initializes an instance of the RemoteSystemKindFilter class with a list of string representations of device types to target. These strings should conform to the values of the properties of the RemoteSystemKinds class. */
+                constructor(remoteSystemKinds: Windows.Foundation.Collections.IIterable<string>);
+                /** String representation(s) of the device type(s) that the containing RemoteSystemKindFilter object targets. */
+                remoteSystemKinds: RemoteSystemKinds;
+            }
+            /** Contains the values that describe a remote system's status type. This is a simplification of the RemoteSystemStatus enumeration and is used to construct a RemoteSystemStatusTypeFilter object. */
+            enum RemoteSystemStatusType {
+                /** The remote system can have any availability status and be discoverable. */
+                any,
+                /** The remote system must have a Status property value of Available in order to be discoverable. */
+                available
+            }
+            /** An IRemoteSystemFilter that limits the set of discoverable remote systems by allowing only those of a specific availability status. */
+            class RemoteSystemStatusTypeFilter implements IRemoteSystemFilter {
+                /** Initializes an instance of the RemoteSystemStatusTypeFilter class. */
+                constructor(remoteSystemStatusType: RemoteSystemStatusType)
+                /** The status type that the containing RemoteSystemStatusTypeFilter object targets. */
+                remoteSystemStatusType: RemoteSystemStatusType;
+            }
+            /** Represents an application on a remote system. */
+            abstract class RemoteSystemApp {
+                /** The app-specific attributes of this application. */
+                Attributes: Windows.Foundation.Collections.IMapView<string, string>;
+                /** The display-friendly name for this application. This is the name used by the device for Bluetooth identification. If this hasn't been set or the device doesn't support Bluetooth, this field will be empty. */
+                displayName: string;
+                /** The unique identifier for this application. */
+                id: string;
+                /** Indicates whether this application is currently available for proximal connection. */
+                isAvailableByProximity: boolean;
+                /** Indicates whether this application is currently available for spatial sharing connection. */
+                isAvailableBySpatialProximity: boolean;
+            }
+            /** Represents an intent to communicate with a specific remote system (device). */
+            class RemoteSystemConnectionRequest {
+                /** Initializes an instance of the RemoteSystemConnectionRequest class. */
+                constructor(remoteSystem: RemoteSystem);
+                /** Represents the remote system (device) that the app intends to communicate with. */
+                remoteSystem: RemoteSystem;
+                /** Represents the remote application that the app intends to communicate with. */
+                remoteSystemApp: RemoteSystemApp;
+                /** Initializes a new instance of the RemoteSystemConnectionRequest class for a particular application on a remote system. */
+                static createForApp(remoteSystemApp: RemoteSystemApp): RemoteSystemConnectionRequest;
+            }
+            /** This class manages the attributes of a discovered remote system (device) and provides the capabilities to discover remote systems as part of Project Rome. */
+            abstract class RemoteSystem {
+                /** A list of the applications on this remote system that have registered with the Connected Devices Platform. */
+                apps: Windows.Foundation.Collections.IVectorView<RemoteSystemApp>;
+                /** Gets the machine name of the given remote system. */
+                displayName: string;
+                /** Gets the unique string identifier for the given remote system. */
+                id: string;
+                /** Checks whether the given remote system is available through proximal connection (such as a Bluetooth or local network connection) as opposed to cloud connection. */
+                isAvailableByProximity: boolean;
+                /** Checks whether the given remote system is available through spatially proximal connection. */
+                isAvailableBySpatialProximity: boolean;
+                /** Gets a String representation of the device type of the given remote system (desktop, Xbox, ...). */
+                kind: string;
+                /** Gets the manufacturer name of the given remote system. */
+                manufacturerDisplayName: string;
+                /** Gets the model name of the given remote system. */
+                modelDisplayName: string;
+                /** Gets a value describing the OS platform that this remote system is running. */
+                platform: RemoteSystemPlatform;
+                /** Gets the status of this remote system's availability. */
+                status: RemoteSystemStatus;
+                /** Returns a RemoteSystemWatcher object with no filters. */
+                static createWatcher(): RemoteSystemWatcher;
+                /** Returns a RemoteSystemWatcher object that filters the remote systems it can see. The filters parameter determines which remote systems will be seen. */
+                static createWatcher(filters: Windows.Foundation.Collections.IIterable<IRemoteSystemFilter>): RemoteSystemWatcher;
+                /** Attempts to discover a single remote system specified by the HostName parameter. */
+                static findByHostNameAsync(host: Windows.Networking.HostName): Windows.Foundation.IPromiseWithIAsyncOperation<RemoteSystem>;
+                /** Reports whether the RemoteSystem is capable of the given Remote System feature. */
+                getCapabilitySupportedAsync(capabilityName: string): Windows.Foundation.IPromiseWithIAsyncOperation<boolean>;
+                /** Checks whether the client device is authorized to discover other users' devices or just same-user devices. */
+                static isAuthorizationKindEnabled(kind: RemoteSystemAuthorizationKind): boolean;
+                /** Gets the status of the calling app's access to the Remote Systems feature. This method should always be called before an app attempts to discover or otherwise interact with remote systems. */
+                static requestAccessAsync(): Windows.Foundation.IPromiseWithIAsyncOperation<RemoteSystemAccessStatus>;
+            }
+        }        
         /** Provides access to information on an app's memory usage. */
         abstract class MemoryManager {
             /** Gets the app's current memory usage. */

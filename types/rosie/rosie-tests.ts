@@ -44,6 +44,8 @@ interface Person {
 }
 
 const personFactory = Factory.define<Person>('Person').attr('firstName', 'John').sequence('id');
+// building a list with a type definition returns that type
+Factory.buildList<Person>('Person', 420, { age: 69 })
 
 // Building does not require the first (attributes) and second (options) arguments
 personFactory.build();
@@ -65,10 +67,30 @@ personFactory.attr('secretCode', ['firstName', 'lastName', 'age', 'age', 'firstN
 // You can go past five dependencies, but you need to specify types
 personFactory.attr('secretCode', ['firstName', 'lastName', 'age', 'age', 'firstName', 'firstName'], (firstName: string, lastName: string, age1: number, age2: number, firstNameAgain: string, firstNameThisIsTooMuch: string) => ({ name: firstNameAgain, value: age1 + age2 }));
 
+// attrs() supports subset of attributes.
+personFactory.attrs({
+  firstName: 'Bob',
+  lastName: 'Newbie'
+})
+
 // Having defined 'Person', `build` will return an object of type Person, using the generic type.
 const person = Factory.build<Person>('Person');
 let aString = '';
 aString = person.firstName;
+
+// It supports options not defined in the type definition
+const personWithNicknameFactory = new Factory<Person>()
+  .attr('firstName', 'Frances')
+  .attr('lastName', 'Parker')
+  .option('nickname', null)
+  .attr('fullName', ['firstName', 'lastName', 'nickname'], (firstName, lastName, nickname) => {
+    if (nickname) {
+      return `${firstName} "${nickname}" ${lastName}`;
+    }
+    return `${firstName} ${lastName}`;
+  });
+// $ExpectType Person
+const personWithNickname = personWithNicknameFactory.build({}, { nickname: 'Franny' });
 
 // Unregistered factories
 const unregisteredPersonFactory = new Factory<Person>();

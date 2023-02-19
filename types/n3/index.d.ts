@@ -1,29 +1,30 @@
-// Type definitions for N3 1.1
+// Type definitions for N3 1.10
 // Project: https://github.com/rdfjs/n3.js
 // Definitions by: Fred Eisele <https://github.com/phreed>
 //                 Ruben Taelman <https://github.com/rubensworks>
 //                 Laurens Rietveld <https://github.com/LaurensRietveld>
+//                 Joachim Van Herwegen <https://github.com/joachimvh>
+//                 Alexey Morozov <https://github.com/AlexeyMz>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.4
 
 /// <reference types="node" />
 
-import * as fs from "fs";
 import * as stream from "stream";
 import * as RDF from "rdf-js";
 import { EventEmitter } from "events";
 
 export interface Prefixes<I = RDF.NamedNode> {
-  [key: string]: I;
+    [key: string]: I;
 }
 
 export type Term = NamedNode | BlankNode | Literal | Variable | DefaultGraph;
-export type PrefixedToIri = (suffix: string) => RDF.NamedNode;
+export type PrefixedToIri = (suffix: string) => NamedNode;
 
-export class NamedNode implements RDF.NamedNode {
+export class NamedNode<Iri extends string = string> implements RDF.NamedNode<Iri> {
     readonly termType: "NamedNode";
-    readonly value: string;
-    constructor(iri: string);
+    readonly value: Iri;
+    constructor(iri: Iri);
     readonly id: string;
     toJSON(): {};
     equals(other: RDF.Term): boolean;
@@ -41,7 +42,7 @@ export class BlankNode implements RDF.BlankNode {
     static subclass(type: any): void;
 }
 
-export class Variable  implements RDF.Variable {
+export class Variable implements RDF.Variable {
     readonly termType: "Variable";
     readonly value: string;
     constructor(name: string);
@@ -82,28 +83,30 @@ export type Quad_Graph = DefaultGraph | NamedNode | BlankNode | Variable;
 
 export class BaseQuad implements RDF.BaseQuad {
     constructor(subject: Term, predicate: Term, object: Term, graph?: Term);
-    subject: Term;
-    predicate: Term;
-    object: Term;
-    graph: Term;
+    readonly termType: 'Quad';
+    readonly value: '';
+    readonly subject: Term;
+    readonly predicate: Term;
+    readonly object: Term;
+    readonly graph: Term;
     equals(other: RDF.BaseQuad): boolean;
     toJSON(): string;
 }
 
 export class Quad extends BaseQuad implements RDF.Quad {
     constructor(subject: Term, predicate: Term, object: Term, graph?: Term);
-    subject: Quad_Subject;
-    predicate: Quad_Predicate;
-    object: Quad_Object;
-    graph: Quad_Graph;
+    readonly subject: Quad_Subject;
+    readonly predicate: Quad_Predicate;
+    readonly object: Quad_Object;
+    readonly graph: Quad_Graph;
     equals(other: RDF.BaseQuad): boolean;
     toJSON(): string;
 }
 
-export class Triple extends Quad implements RDF.Triple {}
+export class Triple extends Quad implements RDF.Quad { }
 
 export namespace DataFactory {
-    function namedNode(value: string): NamedNode;
+    function namedNode<Iri extends string = string>(value: Iri): NamedNode<Iri>;
     function blankNode(value?: string): BlankNode;
     function literal(value: string | number, languageOrDatatype?: string | RDF.NamedNode): Literal;
     function variable(value: string): Variable;
@@ -127,46 +130,46 @@ export interface BlankTriple<Q extends RDF.BaseQuad = RDF.Quad> {
     object: Q['object'];
 }
 
-export interface ParserConstructor {
-    new<Q extends BaseQuad = Quad> (options?: ParserOptions): N3Parser<Q>;
-    <Q extends BaseQuad = Quad>(options?: ParserOptions): N3Parser<Q>;
+export interface Token {
+    type: string;
+    value?: string;
+    line: number;
+    prefix?: string;
 }
-export const Parser: ParserConstructor;
+export interface LexerOptions {
+    lineMode?: boolean;
+    n3?: boolean;
+    comments?: boolean;
+}
 
+export type TokenCallback = (error: Error, token: Token) => void;
+
+export class Lexer {
+    constructor(options?: LexerOptions);
+    tokenize(input: string): Token[];
+    tokenize(input: string | EventEmitter, callback: TokenCallback): void;
+}
 export interface ParserOptions {
     format?: string;
-    prefixes?: string[];
     factory?: RDF.DataFactory;
     baseIRI?: string;
+    blankNodePrefix?: string;
 }
 
 export type ParseCallback<Q extends BaseQuad = Quad> = (error: Error, quad: Q, prefixes: Prefixes) => void;
 
-export interface N3Parser<Q extends BaseQuad = Quad> {
+export type PrefixCallback = (prefix: string, prefixNode: RDF.NamedNode) => void;
+
+export class Parser<Q extends BaseQuad = Quad> {
+    constructor(options?: ParserOptions);
     parse(input: string): Q[];
-    parse(input: string, callback: ParseCallback<Q>): void;
+    parse(input: string, callback: null | undefined, prefixCallback: PrefixCallback): Q[];
+    parse(input: string, callback: ParseCallback<Q>, prefixCallback?: PrefixCallback): void;
 }
 
-export interface StreamParserConstructor {
-  new<Q extends BaseQuad = Quad> (options?: ParserOptions): N3StreamParser<Q>;
-  <Q extends BaseQuad = Quad>(options?: ParserOptions): N3StreamParser<Q>;
-}
-export const StreamParser: StreamParserConstructor;
-
-export interface N3StreamParser<Q extends BaseQuad = Quad> extends RDF.Stream<Q>, NodeJS.WritableStream, RDF.Sink<Q> {
-    // Below are the NodeJS.ReadableStream methods,
-    // we can not extend the interface directly,
-    // as `read` clashes with RDF.Sink.
-    readable: boolean;
-    // read(size?: number): string | Buffer; // Overwritten by RDF.Stream
-    setEncoding(encoding: string | null): void;
-    pause(): this;
-    resume(): this;
-    isPaused(): boolean;
-    pipe<T extends NodeJS.WritableStream | RDF.Stream<Q>>(destination: T, options?: { end?: boolean; }): T;
-    unpipe(destination?: NodeJS.WritableStream | RDF.Stream<Q>): void;
-    unshift(chunk: string | Buffer): void;
-    wrap(oldStream: NodeJS.ReadableStream | RDF.Stream<Q>): NodeJS.ReadableStream;
+export class StreamParser<Q extends BaseQuad = Quad> extends stream.Transform implements RDF.Stream<Q>, RDF.Sink<EventEmitter, RDF.Stream<Q>> {
+    constructor(options?: ParserOptions);
+    import(stream: EventEmitter): RDF.Stream<Q>;
 }
 
 export interface WriterOptions {
@@ -175,21 +178,15 @@ export interface WriterOptions {
     end?: boolean;
 }
 
-export interface WriterConstructor {
-    new<Q extends RDF.BaseQuad = RDF.Quad> (options?: WriterOptions): N3Writer<Q>;
-    new<Q extends RDF.BaseQuad = RDF.Quad> (fd: any, options?: WriterOptions): N3Writer<Q>;
-    <Q extends RDF.BaseQuad = RDF.Quad>(options?: WriterOptions): N3Writer<Q>;
-    <Q extends RDF.BaseQuad = RDF.Quad>(fd: any, options?: WriterOptions): N3Writer<Q>;
-}
-export const Writer: WriterConstructor;
-
-export interface N3Writer<Q extends RDF.BaseQuad = RDF.Quad> {
+export class Writer<Q extends RDF.BaseQuad = RDF.Quad> {
+    constructor(options?: WriterOptions);
+    constructor(fd: any, options?: WriterOptions);
     quadToString(subject: Q['subject'], predicate: Q['predicate'], object: Q['object'], graph?: Q['graph']): string;
     quadsToString(quads: RDF.Quad[]): string;
     addQuad(subject: Q['subject'], predicate: Q['predicate'], object: Q['object'] | Array<Q['object']>, graph?: Q['graph'], done?: () => void): void;
     addQuad(quad: RDF.Quad): void;
     addQuads(quads: RDF.Quad[]): void;
-    addPrefix(prefix: string, iri: RDF.NamedNode | string , done?: () => void): void;
+    addPrefix(prefix: string, iri: RDF.NamedNode | string, done?: () => void): void;
     addPrefixes(prefixes: Prefixes<RDF.NamedNode | string>, done?: () => void): void;
     end(err?: ErrorCallback, result?: string): void;
     blank(predicate: Q['predicate'], object: Q['object']): BlankNode;
@@ -197,44 +194,46 @@ export interface N3Writer<Q extends RDF.BaseQuad = RDF.Quad> {
     list(triple: Array<Q['object']>): Quad_Object[];
 }
 
-export interface StreamWriterConstructor {
-  new<Q extends RDF.BaseQuad = RDF.Quad> (options?: WriterOptions): N3StreamWriter<Q>;
-  new<Q extends RDF.BaseQuad = RDF.Quad> (fd: any, options?: WriterOptions): N3StreamWriter<Q>;
-  <Q extends RDF.BaseQuad = RDF.Quad>(options?: WriterOptions): N3StreamWriter<Q>;
-  <Q extends RDF.BaseQuad = RDF.Quad>(fd: any, options?: WriterOptions): N3StreamWriter<Q>;
+export class StreamWriter<Q extends RDF.BaseQuad = RDF.Quad> extends stream.Transform implements RDF.Sink<RDF.Stream<Q>, EventEmitter> {
+    constructor(options?: WriterOptions);
+    constructor(fd: any, options?: WriterOptions);
+    import(stream: RDF.Stream<Q>): EventEmitter;
 }
-export const StreamWriter: StreamWriterConstructor;
 
-export interface N3StreamWriter<Q extends RDF.BaseQuad = Quad> extends NodeJS.ReadWriteStream, RDF.Sink<Q> {}
-
-export interface N3Store<Q_RDF extends RDF.BaseQuad = RDF.Quad, Q_N3 extends BaseQuad = Quad> extends RDF.Store<Q_RDF> {
+export class Store<Q_RDF extends RDF.BaseQuad = RDF.Quad, Q_N3 extends BaseQuad = Quad, OutQuad extends RDF.BaseQuad = RDF.Quad, InQuad extends RDF.BaseQuad = RDF.Quad>
+  implements RDF.Store<Q_RDF>, RDF.DatasetCore<OutQuad, InQuad> {
+    constructor(triples?: Q_RDF[], options?: StoreOptions);
     readonly size: number;
+    add(quad: InQuad): this;
     addQuad(subject: Q_RDF['subject'], predicate: Q_RDF['predicate'], object: Q_RDF['object'] | Array<Q_RDF['object']>, graph?: Q_RDF['graph'], done?: () => void): void;
     addQuad(quad: Q_RDF): void;
     addQuads(quads: Q_RDF[]): void;
+    delete(quad: InQuad): this;
+    has(quad: InQuad): boolean;
+    import(stream: RDF.Stream<Q_RDF>): EventEmitter;
     removeQuad(subject: Q_RDF['subject'], predicate: Q_RDF['predicate'], object: Q_RDF['object'] | Array<Q_RDF['object']>, graph?: Q_RDF['graph'], done?: () => void): void;
     removeQuad(quad: Q_RDF): void;
     removeQuads(quads: Q_RDF[]): void;
+    remove(stream: RDF.Stream<Q_RDF>): EventEmitter;
+    removeMatches(subject?: Term | null, predicate?: Term | null, object?: Term | null, graph?: Term | null): EventEmitter;
+    deleteGraph(graph: Q_RDF['graph'] | string): EventEmitter;
     getQuads(subject: OTerm, predicate: OTerm, object: OTerm | OTerm[], graph: OTerm): Quad[];
+    match(subject?: Term | null, predicate?: Term | null, object?: Term | null, graph?: Term | null): RDF.Stream<Q_RDF> & RDF.DatasetCore<OutQuad, InQuad>;
     countQuads(subject: OTerm, predicate: OTerm, object: OTerm, graph: OTerm): number;
     forEach(callback: QuadCallback<Q_N3>, subject: OTerm, predicate: OTerm, object: OTerm, graph: OTerm): void;
     every(callback: QuadPredicate<Q_N3>, subject: OTerm, predicate: OTerm, object: OTerm, graph: OTerm): boolean;
     some(callback: QuadPredicate<Q_N3>, subject: OTerm, predicate: OTerm, object: OTerm, graph: OTerm): boolean;
     getSubjects(predicate: OTerm, object: OTerm, graph: OTerm): Array<Q_N3['subject']>;
-    forSubjects(callback: QuadCallback<Q_N3>, predicate: OTerm, object: OTerm, graph: OTerm): void;
+    forSubjects(callback: (result: Q_N3['subject']) => void, predicate: OTerm, object: OTerm, graph: OTerm): void;
     getPredicates(subject: OTerm, object: OTerm, graph: OTerm): Array<Q_N3['predicate']>;
-    forPredicates(callback: QuadCallback<Q_N3>, subject: OTerm, object: OTerm, graph: OTerm): void;
+    forPredicates(callback: (result: Q_N3['predicate']) => void, subject: OTerm, object: OTerm, graph: OTerm): void;
     getObjects(subject: OTerm, predicate: OTerm, graph: OTerm): Array<Q_N3['object']>;
-    forObjects(callback: QuadCallback<Q_N3>, subject: OTerm, predicate: OTerm, graph: OTerm): void;
+    forObjects(callback: (result: Q_N3['object']) => void, subject: OTerm, predicate: OTerm, graph: OTerm): void;
     getGraphs(subject: OTerm, predicate: OTerm, object: OTerm): Array<Q_N3['graph']>;
-    forGraphs(callback: QuadCallback<Q_N3>, subject: OTerm, predicate: OTerm, object: OTerm): void;
+    forGraphs(callback: (result: Q_N3['graph']) => void, subject: OTerm, predicate: OTerm, object: OTerm): void;
     createBlankNode(suggestedName?: string): BlankNode;
+    [Symbol.iterator](): Iterator<OutQuad>;
 }
-export interface StoreConstructor {
-  new<Q_RDF extends RDF.BaseQuad = RDF.Quad, Q_N3 extends BaseQuad = Quad> (triples?: Q_RDF[], options?: StoreOptions): N3Store<Q_RDF, Q_N3>;
-  <Q_RDF extends RDF.BaseQuad = RDF.Quad, Q_N3 extends BaseQuad = Quad>(triples?: Q_RDF[], options?: StoreOptions): N3Store<Q_RDF, Q_N3>;
-}
-export const Store: StoreConstructor;
 
 export interface StoreOptions {
     factory?: RDF.DataFactory;
@@ -247,9 +246,12 @@ export namespace Util {
     function isVariable(value: RDF.Term | null): boolean;
     function isDefaultGraph(value: RDF.Term | null): boolean;
     function inDefaultGraph(value: RDF.Quad): boolean;
-    function prefix(iri: RDF.NamedNode|string, factory?: RDF.DataFactory): PrefixedToIri;
+    function prefix(iri: RDF.NamedNode | string, factory?: RDF.DataFactory): PrefixedToIri;
     function prefixes(
-      defaultPrefixes: Prefixes<RDF.NamedNode|string>,
-      factory?: RDF.DataFactory
+        defaultPrefixes: Prefixes<RDF.NamedNode | string>,
+        factory?: RDF.DataFactory
     ): (prefix: string) => PrefixedToIri;
 }
+
+export function termToId(term: Term): string;
+export function termFromId(id: string, factory: RDF.DataFactory): Term;

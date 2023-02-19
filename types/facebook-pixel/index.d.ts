@@ -1,6 +1,8 @@
 // Type definitions for the Facebook Pixel Tag API
 // Project: https://developers.facebook.com/docs/ads-for-websites/tag-api/
 // Definitions by: Noctis Hsu <https://github.com/noctishsu>
+//                 Victor Hom <https://github.com/VictorHom>
+//                 BC Choi <https://github.com/ninpeng>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 declare var fbq:facebook.Pixel.Event;
 
@@ -8,6 +10,19 @@ declare var fbq:facebook.Pixel.Event;
 declare module facebook.Pixel {
     interface Event {
         (eventType:string, InitialAppId:string):void;
+        (eventType:string, InitialAppId:string, eventName:string,
+            parameters:
+            facebook.Pixel.ViewContentParameters |
+            ViewContentParameters |
+            SearchParameters |
+            AddToCartParameters |
+            AddToWishlistParameters |
+            InitiateCheckoutParameters |
+            AddPaymentInfoParameters |
+            PurchaseParameters |
+            LeadParameters |
+            CompleteRegistrationParameters
+            ):void;
         (eventType:string, eventName:string):void;
         (eventType:string, eventName:string, parameters:facebook.Pixel.ViewContentParameters):void;
         (eventType:string, eventName:string, parameters:ViewContentParameters):void;
@@ -19,6 +34,7 @@ declare module facebook.Pixel {
         (eventType:string, eventName:string, parameters:PurchaseParameters):void;
         (eventType:string, eventName:string, parameters:LeadParameters):void;
         (eventType:string, eventName:string, parameters:CompleteRegistrationParameters):void;
+        (eventType:string, eventName:string, parameters:CustomParameters):void;
 
         (eventType:string, eventName:string, parameters:facebook.Pixel.DPA.AddToCartParameters):void;
         (eventType:string, eventName:string, parameters:facebook.Pixel.DPA.PurchaseParameters):void;
@@ -33,6 +49,10 @@ declare module facebook.Pixel {
         content_type?:string;
         content_ids?:string[];
         content_category?:string;
+        contents?:Array<{
+            id:string;
+            quantity:number;
+        }>;
     }
 
     interface SearchParameters {
@@ -96,8 +116,10 @@ declare module facebook.Pixel {
         value?:number;
         currency?:string;
         content_name?:string;
-        status?:string;
+        status?:boolean;
     }
+
+    type CustomParameters = Record<string,any>;
 }
 
 // For Facebook Tag API using Dynamic Product Ads

@@ -1,7 +1,8 @@
 
 import * as config from "config";
-import { deferConfig } from './defer';
-import { raw } from './raw';
+import { asyncConfig, resolveAsyncConfigs } from 'config/async';
+import { deferConfig } from 'config/defer';
+import { raw } from 'config/raw';
 
 var class1: config.IConfig = config;
 
@@ -38,6 +39,9 @@ var configSourceName: string = configSource.name;
 var configSourceOriginal: string | undefined = configSource.original;
 
 var moduleDefaults: any = config.util.setModuleDefaults("moduleName", {});
+
+asyncConfig(Promise.resolve());
+resolveAsyncConfigs(config);
 
 var deferredValueConfig = {
   firstName: 'Foo',

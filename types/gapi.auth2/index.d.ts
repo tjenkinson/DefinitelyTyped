@@ -85,9 +85,9 @@ declare namespace gapi.auth2 {
      */
     app_package_name?: string;
     /**
-     * 	Fetch users' basic profile information when they sign in.
-     * 	Adds 'profile', 'email' and 'openid' to the requested scopes.
-     * 	True if unspecified.
+     *     Fetch users' basic profile information when they sign in.
+     *     Adds 'profile', 'email' and 'openid' to the requested scopes.
+     *     True if unspecified.
      */
     fetch_basic_profile?: boolean;
     /**
@@ -111,6 +111,14 @@ declare namespace gapi.auth2 {
      * The default redirect_uri is the current URL stripped of query parameters and hash fragment.
      */
     redirect_uri?: string;
+    /**
+     * When your app knows which user it is trying to authenticate, it can provide this parameter as a hint to the authentication server.
+     * Passing this hint suppresses the account chooser and either pre-fill the email box on the sign-in form, or select the proper session (if the user is using multiple sign-in),
+     * which can help you avoid problems that occur if your app logs in the wrong user account. The value can be either an email address or the sub string,
+     * which is equivalent to the user's Google ID.
+     * https://developers.google.com/identity/protocols/OpenIDConnect?hl=en#authenticationuriparameters
+     */
+    login_hint?: string;
   }
 
   /**
@@ -181,6 +189,7 @@ declare namespace gapi.auth2 {
     setFetchBasicProfile(fetch: boolean): any;
     setPrompt(prompt: string): any;
     setScope(scope: string): any;
+    setLoginHint(hint: string): any;
   }
 
   interface BasicProfile {
@@ -281,24 +290,16 @@ declare namespace gapi.auth2 {
     hasGrantedScopes(scopes: string): boolean;
 
     /**
-     * Signs in the user. Use this method to request additional scopes for incremental
-     * authorization or to sign in a user after the user has signed out.
-     * When you use GoogleUser.signIn(), the sign-in flow skips the account chooser step.
-     * See GoogleAuth.signIn().
-     */
-    signIn(options?: SigninOptions | SigninOptionsBuilder): any;
-
-    /**
      * See GoogleUser.signIn()
      */
-    grant(options?: SigninOptions | SigninOptionsBuilder): any;
+    grant(options?: SigninOptions | SigninOptionsBuilder): Promise<any>;
 
     /**
      * Get permission from the user to access the specified scopes offline.
      * When you use GoogleUser.grantOfflineAccess(), the sign-in flow skips the account chooser step.
      * See GoogleUser.grantOfflineAccess().
      */
-    grantOfflineAccess(scopes: string): void;
+    grantOfflineAccess(options?: OfflineAccessOptions): Promise<{code: string}>;
 
     /**
      * Revokes all of the scopes that the user granted.

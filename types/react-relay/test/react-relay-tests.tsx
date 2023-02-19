@@ -48,9 +48,11 @@ const modernEnvironment = new Environment({ network, store });
 type MyQueryVariables = {
     pageID: string;
 };
+
 type MyQueryResponse = {
     name: string;
 };
+
 type MyQuery = {
     variables: MyQueryVariables;
     response: MyQueryResponse;
@@ -714,3 +716,45 @@ requestSubscription(
 
 ReactRelayContext.Consumer.prototype;
 ReactRelayContext.Provider.prototype;
+
+const MyRelayContextProvider: React.FunctionComponent = children => {
+    return (
+        <ReactRelayContext.Provider
+            value={{
+                environment: modernEnvironment,
+            }}>
+            {children}
+        </ReactRelayContext.Provider>
+    );
+};
+
+const MyRelayContextConsumer: React.FunctionComponent = () => {
+    const relayContext = React.useContext(ReactRelayContext);
+    if (!relayContext || !relayContext.environment) {
+        return null;
+    }
+
+    return (
+        <QueryRenderer<MyQuery>
+            environment={relayContext.environment}
+            query={graphql`
+                query ExampleQuery($pageID: ID!) {
+                    page(id: $pageID) {
+                        name
+                    }
+                }
+            `}
+            variables={{
+                pageID: '110798995619330',
+            }}
+            render={({ error, props }) => {
+                if (error) {
+                    return <div>{error.message}</div>;
+                } else if (props) {
+                    return <div>{props.name} is great!</div>;
+                }
+                return <div>Loading</div>;
+            }}
+        />
+    );
+};

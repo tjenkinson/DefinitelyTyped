@@ -18,6 +18,8 @@ const db = levelup(new AbstractLevelDOWN('here'), {
 db.open();
 db.close();
 db.open((error) => {
+    if (error instanceof levelup.errors.InitializationError) {
+    }
 });
 
 db.close((error) => {
@@ -68,3 +70,11 @@ db.createReadStream()
     .on('end', () => {
       console.log('Stream closed');
     });
+
+db.clear((error) => {
+});
+
+db.clear({ gt: 'hello' }, (error) => {
+});
+
+db.clear().then(() => console.log('cleared'));

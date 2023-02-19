@@ -1,4 +1,4 @@
-// Type definitions for react-native-webrtc 1.69
+// Type definitions for react-native-webrtc 1.75
 // Project: https://github.com/react-native-webrtc/react-native-webrtc
 // Definitions by: Carlos Quiroga <https://github.com/KarlosQ>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -34,6 +34,8 @@ export type RTCIceConnectionState =
     | "failed"
     | "disconnected"
     | "closed";
+
+export type RTCPeerConnectionState = "new" | "connecting" | "connected" | "disconnected" | "failed" | "closed";
 
 export class MediaStreamTrack {
     private _enabled: boolean;
@@ -103,7 +105,10 @@ export interface ConfigurationParamWithUrl extends ConfigurationParam {
 
 export interface RTCPeerConnectionConfiguration {
     iceServers: ConfigurationParamWithUrls[] | ConfigurationParamWithUrl[];
-    iceTransportPolicy?: "all" | "public" | "relay";
+    iceTransportPolicy?: "all" | "relay" | "nohost" | "none";
+    bundlePolicy?: "balanced" | "max-compat" | "max-bundle";
+    rtcpMuxPolicy?: "negotiate" | "require";
+    iceCandidatePoolSize?: number;
 }
 
 export interface EventOnCandidate {
@@ -123,17 +128,16 @@ export interface EventOnAddStream {
 export class RTCPeerConnection {
     localDescription: RTCSessionDescriptionType;
     remoteDescription: RTCSessionDescriptionType;
+    connectionState: RTCPeerConnectionState;
 
     signalingState: RTCSignalingState;
     private privateiceGatheringState: RTCIceGatheringState;
     private privateiceConnectionState: RTCIceConnectionState;
 
-    onconnectionstatechange: () => void | undefined;
+    onconnectionstatechange: (event: Event) => void | undefined;
     onicecandidate: (event: EventOnCandidate) => void | undefined;
     onicecandidateerror: (error: Error) => void | undefined;
-    oniceconnectionstatechange: (
-        event: EventOnConnectionStateChange
-    ) => void | undefined;
+    oniceconnectionstatechange: (event: EventOnConnectionStateChange) => void | undefined;
     onicegatheringstatechange: () => void | undefined;
     onnegotiationneeded: () => void | undefined;
     onsignalingstatechange: () => void | undefined;
@@ -154,19 +158,15 @@ export class RTCPeerConnection {
 
     removeStream(stream: MediaStream): void;
 
-    createOffer(): Promise<RTCSessionDescriptionType>;
+    createOffer(options?: RTCOfferOptions): Promise<RTCSessionDescriptionType>;
 
-    createAnswer(): Promise<RTCSessionDescriptionType>;
+    createAnswer(options?: RTCAnswerOptions): Promise<RTCSessionDescriptionType>;
 
     setConfiguration(configuration: RTCPeerConnectionConfiguration): void;
 
-    setLocalDescription(
-        sessionDescription: RTCSessionDescriptionType
-    ): Promise<void>;
+    setLocalDescription(sessionDescription: RTCSessionDescriptionType): Promise<void>;
 
-    setRemoteDescription(
-        sessionDescription: RTCSessionDescriptionType
-    ): Promise<void>;
+    setRemoteDescription(sessionDescription: RTCSessionDescriptionType): Promise<void>;
 
     addIceCandidate(candidate: RTCIceCandidateType): Promise<void>;
 
@@ -178,10 +178,7 @@ export class RTCPeerConnection {
 
     close(): void;
 
-    private _getTrack(
-        streamReactTag: string,
-        trackId: string
-    ): MediaStreamTrack;
+    private _getTrack(streamReactTag: string, trackId: string): MediaStreamTrack;
 
     private _unregisterEvents(): void;
 
@@ -238,8 +235,10 @@ export class mediaDevices {
 
     static enumerateDevices(): Promise<any>;
 
-    static getUserMedia(constraints: MediaStreamConstraints): MediaStream;
+    static getUserMedia(constraints: MediaStreamConstraints): Promise<MediaStream | boolean>;
 }
+
+export function registerGlobals(): void;
 
 export interface RTCViewProps {
     streamURL: string;
@@ -250,3 +249,14 @@ export interface RTCViewProps {
 }
 
 export class RTCView extends Component<RTCViewProps, any> {}
+
+export interface RTCOfferOptions {
+    iceRestart?: boolean;
+    offerToReceiveAudio?: boolean;
+    offerToReceiveVideo?: boolean;
+    voiceActivityDetection?: boolean;
+}
+
+export interface RTCAnswerOptions {
+    voiceActivityDetection?: boolean;
+}

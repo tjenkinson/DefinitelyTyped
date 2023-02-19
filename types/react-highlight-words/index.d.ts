@@ -12,7 +12,7 @@ export interface FindChunks {
   autoEscape?: boolean;
   caseSensitive?: boolean;
   sanitize?: (text: string) => string;
-  searchWords: string[];
+  searchWords: Array<string|RegExp>;
   textToHighlight: string;
 }
 
@@ -21,7 +21,7 @@ export interface Chunk {
   end: number;
 }
 
-interface HighlighterProps {
+export interface HighlighterProps {
     /** The class name to be applied to an active match. Use along with activeIndex */
     activeClassName?: string;
     /** Specify the match index that should be actively highlighted. Use along with activeClassName */
@@ -55,13 +55,15 @@ interface HighlighterProps {
      */
     sanitize?: (text: string) => string;
     /** Array of search words. The search terms are treated as RegExps unless autoEscape is set. */
-    searchWords: string[];
+    searchWords: Array<string|RegExp>;
     /** Text to highlight matches in */
     textToHighlight: string;
     /** CSS class name applied to unhighlighted text */
     unhighlightClassName?: string;
     /** Inline styles applied to unhighlighted text */
     unhighlightStyle?: React.CSSProperties;
+    /** Allows to pass through any parameter to wrapped component */
+    [index: string]: any;
 }
 
 declare class Highlighter extends React.Component<HighlighterProps> {}

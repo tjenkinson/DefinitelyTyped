@@ -4,7 +4,6 @@
 //                 Dave Allen <https://github.com/fullflavedave>
 //                 Olivier Refalo <https://github.com/orefalo>
 //                 Daniel Neveux <https://github.com/dagatsoin>
-//                 Birk Skyum <https://github.com/birkskyum>
 //                 Arda TANRIKULU <https://github.com/ardatan>
 //                 Stefan Holzapfel <https://github.com/stefanholzapfel>
 //                 Andrey Markeev <https://github.com/andrei-markeev>
@@ -13,8 +12,12 @@
 //                 alesn <https://github.com/alesn>
 //                 Per Bergland <https://github.com/perbergland>
 //                 Nicusor Chiciuc <https://github.com/nicu-chiciuc>
+//                 Evan Broder <https://github.com/ebroder>
+//                 Radosław Miernik <https://github.com/radekmie>
+//                 Wojciech Adamek <https://github.com/wadamek65>
+//                 Maciej Stasieluk <https://github.com/MacRusher>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.8
+// Minimum TypeScript Version: 3.7
 
 /// <reference path="./accounts-base.d.ts" />
 /// <reference path="./globals/accounts-base.d.ts" />
@@ -30,16 +33,21 @@
 /// <reference path="./globals/ddp.d.ts" />
 /// <reference path="./ejson.d.ts" />
 /// <reference path="./globals/ejson.d.ts" />
+/// <reference path="./fetch.d.ts" />
 /// <reference path="./email.d.ts" />
 /// <reference path="./globals/email.d.ts" />
 /// <reference path="./http.d.ts" />
 /// <reference path="./globals/http.d.ts" />
 /// <reference path="./meteor.d.ts" />
 /// <reference path="./globals/meteor.d.ts" />
+/// <reference path="./modern-browsers.d.ts" />
 /// <reference path="./mongo.d.ts" />
 /// <reference path="./globals/mongo.d.ts" />
+/// <reference path="./promise.d.ts" />
 /// <reference path="./random.d.ts" />
 /// <reference path="./globals/random.d.ts" />
+/// <reference path="./reactive-dict.d.ts" />
+/// <reference path="./globals/reactive-dict.d.ts" />
 /// <reference path="./reactive-var.d.ts" />
 /// <reference path="./globals/reactive-var.d.ts" />
 /// <reference path="./server-render.d.ts" />

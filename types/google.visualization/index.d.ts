@@ -1,22 +1,53 @@
 // Type definitions for Google Visualisation Apis
 // Project: https://developers.google.com/chart/
-// Definitions by: Dan Ludwig <https://github.com/danludwig>, Gregory Moore <https://github.com/gmoore-sjcorg>, Dan Manastireanu <https://github.com/danmana>, Michael Cheng <https://github.com/mlcheng>, Ivan Bisultanov <https://github.com/IvanBisultanov>, Gleb Mazovetskiy <https://github.com/glebm>, Shrujal Shah <https://github.com/shrujalshah28>
+// Definitions by: Dan Ludwig <https://github.com/danludwig>,
+//                 Gregory Moore <https://github.com/gmoore-sjcorg>,
+//                 Dan Manastireanu <https://github.com/danmana>,
+//                 Michael Cheng <https://github.com/mlcheng>,
+//                 Ivan Bisultanov <https://github.com/IvanBisultanov>,
+//                 Gleb Mazovetskiy <https://github.com/glebm>,
+//                 Shrujal Shah <https://github.com/shrujalshah28>,
+//                 David <https://github.com/dckorben>
+//                 Martin Badin <https://github.com/martin-badin>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 declare namespace google {
-
-    function load(visualization: string, version: string, packages: any): void;
+    /** Legacy https://developers.google.com/chart/interactive/docs/basic_load_libs#updateloader */
+    function load(visualization: 'visualization', version: string | number, options: LoadOptions): void;
     function setOnLoadCallback(handler: Function): void;
     function setOnLoadCallback(handler: () => void): void;
 
     // https://developers.google.com/chart/interactive/docs/basic_load_libs
     namespace charts {
-        function load(version: string, packages: Object): void;
+        /** Loads with `safeMode` enabled. */
+        function safeLoad(options: LoadOptions): Promise<void>;
+        function load(options: LoadOptions): Promise<void>;
+        function load(version: string | number, options: LoadOptions): Promise<void>;
+        /** Legacy https://developers.google.com/chart/interactive/docs/basic_load_libs#updateloader */
+        function load(visualization: 'visualization', version: string | number, options: LoadOptions): Promise<void>;
+
         function setOnLoadCallback(handler: Function): void;
+    }
+
+    export interface LoadOptions {
+        packages?: string | string[];
+        language?: string;
+        callback?: Function;
+        mapsApiKey?: string;
+        safeMode?: boolean;
+        /** not documented */
+        debug?: boolean;
+        /** not documented */
+        pseudo?: boolean;
+        /** not documented, looks for charts-version in url query params */
+        enableUrlSettings?: boolean;
     }
 
     // https://developers.google.com/chart/interactive/docs/reference
     namespace visualization {
+
+        export function dataTableToCsv(data: DataTable | DataView): string;
+        export function arrayToDataTable(data: any[], firstRowIsData?: boolean): DataTable;
 
         export interface ChartSpecs {
             chartType: string;
@@ -38,7 +69,6 @@ declare namespace google {
         }
 
         //#region ChartWrapper
-
         // https://developers.google.com/chart/interactive/docs/reference#chartwrapperobject
         export class ChartWrapper {
             constructor(spec?: ChartSpecs);
@@ -49,7 +79,7 @@ declare namespace google {
             getDataTable(): DataTable;
             getChartType(): string;
             getChartName(): string;
-            getChart(): any;
+            getChart(): ChartBase | null;
             getContainerId(): string;
             getQuery(): string;
             getRefreshInterval(): number;
@@ -67,10 +97,45 @@ declare namespace google {
             setOptions(options: Object): void;
             setView(view_spec: string): void;
         }
-
         //#endregion
-        //#region DataTable
 
+        //#region data
+        // https://developers.google.com/chart/interactive/docs/reference#google_visualization_data_group
+        export interface GroupKeyOptions {
+            column: number;
+            type: string;
+            modifier?: (value: any) => any;
+            label?: string;
+            id?: string;
+        }
+
+        export interface GroupColumnOptions {
+            column: number;
+            aggregation: (values: any[]) => any;
+            type: string;
+            label?: string;
+            id?: string;
+        }
+
+        namespace data {
+            // https://developers.google.com/chart/interactive/docs/reference#data_modifier_functions
+            function month(value: Date): number;
+
+            // https://developers.google.com/chart/interactive/docs/reference#group
+            function sum(values: ReadonlyArray<number>): number;
+            function avg(values: ReadonlyArray<number>): number;
+            function min(values: ReadonlyArray<number> | ReadonlyArray<string> | ReadonlyArray<Date>): number | string | Date | null;
+            function max(values: ReadonlyArray<number> | ReadonlyArray<string> | ReadonlyArray<Date>): number | string | Date | null;
+            function count(values: ReadonlyArray<any>): number;
+
+            function group(data: DataTable | DataView, keys: ReadonlyArray<number | GroupKeyOptions>, columns?: ReadonlyArray<GroupColumnOptions>): DataTable;
+
+            // https://developers.google.com/chart/interactive/docs/reference#join
+            function join(dataA: DataTable | DataView, dataB: DataTable | DataView, joinMethod: 'full' | 'inner' | 'left' | 'right', keys: ReadonlyArray<[number|string, number|string]>, columnsA: ReadonlyArray<number|string>, columnsB: ReadonlyArray<number|string>): DataTable;
+        }
+        //#endregion
+
+        //#region DataTable
         // https://developers.google.com/chart/interactive/docs/reference#DataTable
         export class DataTable {
             constructor(data?: any, version?: any);
@@ -83,6 +148,7 @@ declare namespace google {
             addRows(rows: any[][]): number;
             clone(): DataTable;
             getColumnId(columnIndex: number): string;
+            getColumnIndex(columnIdentifier: number|string): number;
             getColumnLabel(columnIndex: number): string;
             getColumnPattern(columnIndex: number): string;
             getColumnProperties(columnIndex: number): Properties;
@@ -98,7 +164,7 @@ declare namespace google {
             getProperty(rowIndex: number, columnIndex: number, name: string): any;
             getProperties(rowIndex: number, columnIndex: number): Properties;
             getRowProperties(rowIndex: number): Properties;
-            getRowProperty(rowIndex: number, name: string): Properties;
+            getRowProperty(rowIndex: number, name: string): any;
             getSortedRows(sortColumn: number): number[];
             getSortedRows(sortColumn: SortByColumn): number[];
             getSortedRows(sortColumns: number[]): number[];
@@ -175,6 +241,7 @@ declare namespace google {
             value?: any;
             minValue?: any;
             maxValue?: any;
+            test?: (value: any, row?: number, column?: number, data?: DataTable | DataView) => boolean;
         }
 
         export interface DataObjectCell {
@@ -191,8 +258,6 @@ declare namespace google {
             minValue?: any;
             maxValue?: any;
         }
-
-        function arrayToDataTable(data: any[], firstRowIsData?: boolean): DataTable;
 
         //#endregion
         //#region Query
@@ -214,7 +279,6 @@ declare namespace google {
             sendMethod?: string,
             makeRequestParams?: Object
         }
-
         //#endregion
         //#region QueryResponse
 
@@ -235,8 +299,7 @@ declare namespace google {
 
         // https://developers.google.com/chart/interactive/docs/reference#DataView
         export class DataView {
-            constructor(data: DataTable);
-            constructor(data: DataView);
+            constructor(data: DataTable | DataView);
 
             getColumnId(columnIndex: number): String;
             getColumnLabel(columnIndex: number): string;
@@ -251,7 +314,7 @@ declare namespace google {
             getNumberOfRows(): number;
             getProperty(rowIndex: number, columnIndex: number, name: string): any;
             getProperties(rowIndex: number, columnIndex: number): Properties;
-            getRowProperty(rowIndex: number, name: string): Properties;
+            getRowProperty(rowIndex: number, name: string): any;
             getSortedRows(sortColumn: number): number[];
             getSortedRows(sortColumn: SortByColumn): number[];
             getSortedRows(sortColumns: number[]): number[];
@@ -262,6 +325,7 @@ declare namespace google {
             getTableRowIndex(viewRowIndex: number): number;
             getViewColumnIndex(tableColumnIndex: number): number;
             getViewColumns(): number[];
+            getViewColumns(): ColumnSpec[];
             getViewRowIndex(tableRowIndex: number): number;
             getViewRows(): number[];
 
@@ -280,26 +344,25 @@ declare namespace google {
         }
 
         export interface ColumnSpec {
-            calc: (dataTable: DataTable, row: number) => any;
-            type: string;
+            calc?: (data: DataTable, row: number) => any;
+            type?: string;
             label?: string;
             id?: string;
             sourceColumn?: number;
             properties?: Properties;
             role?: string;
         }
-
         //#endregion
         //#region GeoChart
 
         // https://developers.google.com/chart/interactive/docs/gallery/geochart
-        export class GeoChart extends ChartBase {
-            draw(data: DataTable, options: GeoChartOptions): void;
+        export class GeoChart extends ChartBaseRenderable {
+            draw(data: DataTable | DataView, options: GeoChartOptions): void;
         }
 
         // https://developers.google.com/chart/interactive/docs/gallery/geochart?hl=fr&csw=1#Configuration_Options
         export interface GeoChartOptions {
-            backgroundColor?: any;
+            backgroundColor?: string | ChartStrokeFill;
             colorAxis?: ChartColorAxis;
             datalessRegionColor?: string;
             defaultColor?: string;
@@ -329,7 +392,6 @@ declare namespace google {
 
         //#endregion
         //#region Common
-
         export interface ChartAnnotations {
             boxStyle?: ChartBoxStyle;
             textStyle?: ChartTextStyle;
@@ -387,7 +449,7 @@ declare namespace google {
                 opacity?: number;
             }
             opacity?: number;
-            orientation?: string;
+            orientation?: ChartOrientation;
             selected?: {
                 color?: string;
                 opacity?: number;
@@ -404,14 +466,25 @@ declare namespace google {
             zoomDelta?: number;
         }
 
+        export interface ChartStrokeFill extends ChartStroke, ChartFill {
+        }
+
         export interface ChartStroke {
-            stroke: string;
-            strokeWidth: number;
-            fill: string;
+            stroke?: string;
+            strokeWidth?: number;
+        }
+
+        export interface ChartStrokeOpacity extends ChartStroke {
+            strokeOpacity?: number;
+        }
+
+        export interface ChartFill {
+            fill?: string;
+            fillOpacity?: number;
         }
 
         export interface ChartArea {
-            backgroundColor?: string | { stroke: string; strokeWidth?: number };
+            backgroundColor?: string | ChartStrokeFill;
             top?: number | string;
             left?: number | string;
             right?: number | string;
@@ -419,6 +492,11 @@ declare namespace google {
             width?: number | string;
             height?: number | string;
         }
+
+        export type ChartOrientation = 'vertical' | 'horizontal';
+        export type ChartAxisTitlesPosition = 'in' | 'out' | 'none';
+
+        export type ChartSelectionMode = 'single' | 'multiple';
 
         export type ChartLegendPosition = 'bottom' | 'left' | 'in' | 'none' | 'right' | 'top';
         export type ChartLegendAlignment = 'start' | 'center' | 'end';
@@ -450,7 +528,7 @@ declare namespace google {
             ticks?: any[];
             title?: string;
             titleTextStyle?: ChartTextStyle;
-            allowContainerBoundaryTextCufoff?: boolean;
+            allowContainerBoundaryTextCutoff?: boolean;
             slantedText?: boolean;
             slantedTextAngle?: number;
             maxAlternation?: number;
@@ -496,6 +574,8 @@ declare namespace google {
             legend?: ChartLegend;
         }
 
+        export type ChartPointShape = 'circle' | 'triangle' | 'square' | 'diamond' | 'star' | 'polygon';
+
         export interface ChartLayoutInterface {
             getBoundingBox(id: string): ChartBoundingBox;
             getChartAreaBoundingBox(): ChartBoundingBox;
@@ -509,26 +589,58 @@ declare namespace google {
             groupWidth: any; // number | string
         }
 
-        export interface VisualizationSelectionArray {
-            column?: number;
-            row?: number;
+        export interface ChartSelection {
+            column?: number | null;
+            row?: number | null;
         }
 
         export interface Candlestick {
             hollowIsRising?: boolean;
-            fallingColor?: ChartStroke;
-            risingColor?: ChartStroke;
+            fallingColor?: ChartStrokeFill;
+            risingColor?: ChartStrokeFill;
         }
 
-        class ChartBase {
+        export interface ChartSeriesOptionsBase {
+            color?: string;
+        }
+
+        // https://developers.google.com/chart/interactive/docs/gallery/trendlines
+        export interface ChartTrendlineOptions {
+            type?: 'linear' | 'exponential' | 'polynomial';
+            degree?: number;
+            color?: string;
+            lineWidth?: number;
+            opacity?: number;
+            pointSize?: number;
+            pointsVisible?: boolean;
+            labelInLegend?: string;
+            visibleInLegend?: boolean;
+            showR2?: boolean
+        }
+
+        export interface ChartAction {
+            id: string | number;
+            text: string;
+            action: () => void;
+        }
+
+        abstract class ChartBase {
             constructor(element: Element);
-            getSelection(): VisualizationSelectionArray[];
-            setSelection(selection: VisualizationSelectionArray[]): void;
+            getContainer(): Element;
+            getSelection(): ChartSelection[];
+            setSelection(selection?: ChartSelection[] | null): void;
+        }
+
+        abstract class ChartBaseClearable extends ChartBase {
             clearChart(): void;
+        }
+
+        abstract class ChartBaseRenderable extends ChartBaseClearable {
             getImageURI(): string;
         }
 
-        class CoreChartBase extends ChartBase {
+        abstract class CoreChartBase extends ChartBaseRenderable {
+            getAction(id: string | number): ChartAction;
             getBoundingBox(id: string): ChartBoundingBox;
             getChartAreaBoundingBox(): ChartBoundingBox;
             getChartLayoutInterface(): ChartLayoutInterface;
@@ -536,6 +648,8 @@ declare namespace google {
             getVAxisValue(position: number, axisIndex?: number): number;
             getXLocation(position: number, axisIndex?: number): number;
             getYLocation(position: number, axisIndex?: number): number;
+            removeAction(id: string | number): void;
+            setAction(action: ChartAction): void;
         }
 
         //#endregion
@@ -550,12 +664,12 @@ declare namespace google {
             aggregationTarget?: string;
             animation?: TransitionAnimation;
             annotations?: ChartAnnotations;
-            axisTitlesPosition?: string; // in, out, none
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             chartArea?: ChartArea;
             colors?: string[];
             crosshair?: ChartCrosshair;
-            curveType?: string;
+            curveType?: 'none' | 'function';
             dataOpacity?: number;
             enableInteractivity?: boolean;
             explorer?: ChartExplorer;
@@ -566,10 +680,14 @@ declare namespace google {
             height?: number;
             legend?: ChartLegend | 'none';
             lineWidth?: number;
+            orientation?: ChartOrientation;
+            pointShape?: ChartPointShape;
             pointSize?: number;
-            selectionMode?: string;
+            pointsVisible?: boolean;
+            selectionMode?: ChartSelectionMode;
             series?: any;
             theme?: string;
+            trendlines?: { [key: number]: ChartTrendlineOptions; };
             title?: string;
             titlePosition?: string;
             titleTextStyle?: ChartTextStyle;
@@ -591,8 +709,8 @@ declare namespace google {
             aggregationTarget?: string;
             animation?: TransitionAnimation;
             annotations?: ChartBarColumnAnnotations;
-            axisTitlesPosition?: string; // in, out, none
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             bar?: GroupWidth;
             chartArea?: ChartArea;
             colors?: string[];
@@ -606,7 +724,7 @@ declare namespace google {
             isStacked?: boolean | 'percent' | 'relative' | 'absolute';
             legend?: ChartLegend | 'none';
             reverseCategories?: boolean;
-            selectionMode?: string // single / multiple
+            selectionMode?: ChartSelectionMode;
             series?: any;
             theme?: string;
             title?: string;
@@ -626,17 +744,41 @@ declare namespace google {
             draw(data: DataTable | DataView, options: LineChartOptions): void;
         }
 
+        export interface LineChartSeriesOptions extends ChartSeriesOptionsBase {
+            annotations?: ChartAnnotations;
+            curveType?: 'none' | 'function';
+            pointShape?: ChartPointShape;
+            pointSize?: number;
+            pointsVisible?: boolean;
+            lineWidth?: number;
+            lineDashStyle?: number[];
+            visibleInLegend?: boolean;
+            labelInLegend?: string;
+            targetAxisIndex?: number;
+        }
+
+        // https://developers.google.com/chart/interactive/docs/gallery/intervals#combining-interval-styles
+        export interface Intervals {
+            style?: 'area' | 'bars' | 'boxes' | 'line' | 'points' | 'sticks';
+            color?: string;
+            barWidth?: number;
+            boxWidth?: number;
+            lineWidth?: number;
+            pointSize?: number;
+            fillOpacity?: number;
+        }
+
         // https://developers.google.com/chart/interactive/docs/gallery/linechart#Configuration_Options
         export interface LineChartOptions {
             aggregationTarget?: string;
             animation?: TransitionAnimation;
             annotations?: ChartAnnotations;
-            axisTitlesPosition?: string;
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             chartArea?: ChartArea;
             colors?: string[];
             crosshair?: ChartCrosshair;
-            curveType?: string;
+            curveType?: 'none' | 'function';
             dataOpacity?: number;
             enableInteractivity?: boolean;
             explorer?: ChartExplorer;
@@ -649,11 +791,17 @@ declare namespace google {
             legend?: ChartLegend | 'none';
             lineWidth?: number;
             min?: number;
-            orientation?: string;
-            pointSize?: number;
+            orientation?: ChartOrientation;
             reverseCategories?: boolean;
-            selectionMode?: string // single / multiple
-            series?: any;
+            selectionMode?: ChartSelectionMode;
+            series?: LineChartSeriesOptions[] | { [key: number]: LineChartSeriesOptions; };
+            domainAxis?: { type: string };
+            trendlines?: { [key: number]: ChartTrendlineOptions; };
+            pointShape?: ChartPointShape;
+            pointSize?: number;
+            pointsVisible?: boolean;
+            intervals?: Intervals;
+            interval?: any;
             theme?: string;
             title?: string;
             titlePosition?: string;
@@ -672,8 +820,8 @@ declare namespace google {
             aggregationTarget?: string;
             animation?: TransitionAnimation;
             annotations?: ChartBarColumnAnnotations;
-            axisTitlesPosition?: string; // in, out, none
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             bar?: GroupWidth;
             chartArea?: ChartArea;
             colors?: string[];
@@ -715,8 +863,8 @@ declare namespace google {
         // https://developers.google.com/chart/interactive/docs/gallery/histogram#configuration-options
         export interface HistogramOptions {
             animation?: TransitionAnimation;
-            axisTitlesPosition?: string; // in, out, none
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             bar?: GroupWidth;
             chartArea?: ChartArea;
             colors?: string[];
@@ -731,7 +879,7 @@ declare namespace google {
             interpolateNulls?: boolean;
             isStacked?: boolean | 'percent' | 'relative' | 'absolute';
             legend?: ChartLegend | 'none';
-            orientation?: string;
+            orientation?: ChartOrientation;
             reverseCategories?: boolean;
             series?: any;
             theme?: string;
@@ -764,8 +912,8 @@ declare namespace google {
             animation?: TransitionAnimation;
             annotations?: ChartAnnotations;
             areaOpacity?: number;
-            axisTitlesPosition?: string;
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             chartArea?: ChartArea;
             colors?: string[];
             crosshair?: ChartCrosshair;
@@ -781,10 +929,10 @@ declare namespace google {
             isStacked?: boolean | 'percent' | 'relative' | 'absolute';
             legend?: ChartLegend | 'none';
             lineWidth?: number;
-            orientation?: string;
+            orientation?: ChartOrientation;
             pointSize?: number;
             reverseCategories?: boolean;
-            selectionMode?: string // single / multiple
+            selectionMode?: ChartSelectionMode;
             series?: any;
             theme?: string;
             title?: string;
@@ -800,9 +948,8 @@ declare namespace google {
         //#region AnnotationChart
 
         // https://developers.google.com/chart/interactive/docs/gallery/annotationchart
-        export class AnnotationChart extends CoreChartBase
-        {
-            draw(data: DataTable | DataView, options: AnnotationChartOptions): void;
+        export class AnnotationChart extends ChartBaseClearable {
+            draw(data: DataTable | DataView, options: AnnotationChartOptions, state?: any): void;
             setVisibleChartRange(start: Date, end: Date): void;
             getVisibleChartRange(): {start: Date; end: Date };
             hideDataColumns(columnIndexes: number | number[]): void;
@@ -851,8 +998,8 @@ declare namespace google {
             aggregationTarget?: string;
             animation?: TransitionAnimation;
             areaOpacity?: number;
-            axisTitlesPosition?: string;
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             chartArea?: ChartArea;
             colors?: string[];
             connectSteps?: boolean;
@@ -866,7 +1013,7 @@ declare namespace google {
             isStacked?: boolean | 'percent' | 'relative' | 'absolute';
             legend?: ChartLegend | 'none';
             reverseCategories?: boolean;
-            selectionMode?: string // single / multiple
+            selectionMode?: ChartSelectionMode;
             series?: any;
             theme?: string;
             title?: string;
@@ -888,7 +1035,7 @@ declare namespace google {
 
         // https://developers.google.com/chart/interactive/docs/gallery/piechart#configuration-options
         export interface PieChartOptions {
-            backgroundColor?: any;
+            backgroundColor?: string | ChartStrokeFill;
             chartArea?: ChartArea;
             colors?: string[];
             enableInteractivity?: boolean;
@@ -923,8 +1070,8 @@ declare namespace google {
 
         export interface BubbleChartOptions {
             animation?: TransitionAnimation;
-            axisTitlesPosition?: string; // in, out, none
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             bubble?: ChartBubble;
             chartArea?: ChartArea;
             colors?: string[];
@@ -937,7 +1084,7 @@ declare namespace google {
             hAxis?: ChartAxis;
             height?: number;
             legend?: ChartLegend | 'none';
-            selectionMode?: string;
+            selectionMode?: ChartSelectionMode;
             series?: any;
             sizeAxis?: ChartSizeAxis;
             sortBubblesBySize?: boolean;
@@ -967,7 +1114,7 @@ declare namespace google {
         //#region TreeMap
 
         // https://developers.google.com/chart/interactive/docs/gallery/treemap
-        export class TreeMap extends ChartBase {
+        export class TreeMap extends ChartBaseClearable {
             draw(data: DataTable | DataView, options?: TreeMapOptions): void;
             goUpAndDraw(): void;
             getMaxPossibleDepth(): number;
@@ -1005,8 +1152,9 @@ declare namespace google {
         //#region Table
 
         // https://developers.google.com/chart/interactive/docs/gallery/table
-        export class Table extends ChartBase {
+        export class Table extends ChartBaseClearable {
             draw(data: DataTable | DataView, options?: TableOptions): void;
+            getSortInfo(): TableSortInfo;
         }
 
         // https://developers.google.com/chart/interactive/docs/gallery/table#Configuration_Options
@@ -1015,9 +1163,11 @@ declare namespace google {
             alternatingRowStyle?: boolean;
             cssClassNames?: CssClassNames;
             firstRowNumber?: number;
-            height?: string;
+            frozenColumns?: number;
+            height?: string | number;
             page?: string;
             pageSize?: number;
+            pagingButtons?: number | 'both' | 'prev' | 'next' | 'auto';
             rtlTable?: boolean;
             scrollLeftStartPosition?: number;
             showRowNumber?: boolean;
@@ -1025,7 +1175,7 @@ declare namespace google {
             sortAscending?: boolean;
             sortColumn?: number;
             startPage?: number;
-            width?: string;
+            width?: string | number;
         }
 
         export interface CssClassNames {
@@ -1039,6 +1189,12 @@ declare namespace google {
             rowNumberCell?: string;
         }
 
+        export interface TableSortInfo {
+            column: number;
+            ascending: boolean;
+            sortedIndexes: number[];
+        }
+
         //#endregion
         //#region Timeline
 
@@ -1047,31 +1203,40 @@ declare namespace google {
             constructor(element: Element);
             draw(data: DataTable | DataView, options?: TimelineOptions): void;
             clearChart(): void;
+            getSelection(): ChartSelection[];
         }
 
         // https://developers.google.com/chart/interactive/docs/gallery/timeline#Configuration_Options
         export interface TimelineOptions {
             avoidOverlappingGridLines?: boolean;
-            backgroundColor?: any;
+            backgroundColor?: string | ChartStrokeFill;
             colors?: string[];
             enableInteractivity?: boolean;
+            fontName?: string;
+            fontSize?: number;
             forceIFrame?: boolean;
             height?: number;
             timeline?: {
                 barLabelStyle?: LabelStyle;
                 colorByRowLabel?: boolean;
                 groupByRowLabel?: boolean;
-                rowLabelStyle?: LabelStyle;
+                rowLabelStyle?: LabelStyle | null;
+                showBarLabels?: boolean;
                 showRowLabels?: boolean;
-                singleColor?: string;
-            }
+                singleColor?: string | null;
+            };
+            tooltip?: {
+                isHtml?: boolean;
+                trigger?: 'focus' | 'none';
+                textStyle?: ChartTextStyle;
+            };
             width?: number;
         }
 
         export interface LabelStyle {
             color: string;
             fontName: string;
-            fontSize: string;
+            fontSize: number;
         }
 
         //#endregion
@@ -1086,8 +1251,8 @@ declare namespace google {
         export interface CandlestickChartOptions {
             aggregationTarget?: string;
             animation?: TransitionAnimation;
-            axisTitlesPosition?: string;
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             bar?: GroupWidth;
             candlestick?: Candlestick;
             chartArea?: ChartArea;
@@ -1099,9 +1264,9 @@ declare namespace google {
             hAxis?: ChartAxis;
             height?: number;
             legend?: ChartLegend | 'none';
-            orientation?: string;
+            orientation?: ChartOrientation;
             reverseCategories?: boolean;
-            selectionMode?: string // single / multiple
+            selectionMode?: ChartSelectionMode;
             series?: any;
             theme?: string;
             title?: string;
@@ -1127,14 +1292,14 @@ declare namespace google {
             animation?: TransitionAnimation;
             annotations?: ChartAnnotations;
             areaOpacity?: number;
-            axisTitlesPosition?: string; // in, out, none
-            backgroundColor?: any;
+            axisTitlesPosition?: ChartAxisTitlesPosition;
+            backgroundColor?: string | ChartStrokeFill;
             bar?: GroupWidth;
             candlestick?: Candlestick;
             chartArea?: ChartArea;
             colors?: string[];
             crosshair?: ChartCrosshair;
-            curveType?: string;
+            curveType?: 'none' | 'function';
             dataOpacity?: number;
             enableInteractivity?: boolean;
             focusTarget?: string;
@@ -1148,12 +1313,12 @@ declare namespace google {
             legend?: ChartLegend | 'none';
             lineDashStyle?: number[];
             lineWidth?: number;
-            orientation?: string;
-            pointShape?: string;
+            orientation?: ChartOrientation;
+            pointShape?: ChartPointShape;
             pointSize?: number;
             pointsVisible?: boolean;
             reverseCategories?: boolean;
-            selectionMode?: string;// single / multiple
+            selectionMode?: ChartSelectionMode;
             series?: any;
             seriesType?: string;
             theme?: string;
@@ -1173,13 +1338,13 @@ declare namespace google {
         export class Dashboard {
             constructor(containerRef: HTMLElement);
             bind(controls: ControlWrapper | ControlWrapper[], charts: ChartWrapper | ChartWrapper[]): google.visualization.Dashboard;
-            draw(dataTable: DataTable): void;
+            draw(data: DataTable | DataView): void;
             getSelection(): Object[];
         }
 
         //#endregion
         //#region ControlWrapper
-        
+
         // https://developers.google.com/chart/interactive/docs/gallery/controls#controlwrapperobject
         export class ControlWrapper {
             constructor(opt_spec?: ControlWrapperOptions)
@@ -1201,7 +1366,7 @@ declare namespace google {
             setState(state_obj: Object): void;
         }
 
-        export interface ControlWrapperOptions {        
+        export interface ControlWrapperOptions {
             controlType: string;
             containerId: string;
             options?: Object;
@@ -1212,61 +1377,52 @@ declare namespace google {
         //#region calendar
 
         // https://developers.google.com/chart/interactive/docs/gallery/calendar
-        export class Calendar extends ChartBase {
+        export class Calendar extends ChartBaseClearable {
             draw(data: DataTable | DataView, options?: CalendarOptions): void;
             getBoundingBox(id: string): Object;
-            getSelection(): any[];
-            setSelection(): void;
-            clearChart(): void;
         }
 
         // https://developers.google.com/chart/interactive/docs/gallery/calendar#Configuration_Options
         export interface CalendarOptions {
-            calendar: {
-                cellColor: Object;
-                cellSize: number;
-                dayOfWeekLabel: Object;
-                dayOfWeekRightSpace: number;
-                daysOfWeek: string;
-                focusedCellColor: Object;
-                monthLabel: Object;
-                monthOutlineColor: Object;
-                underMonthSpace: number;
-                underYearSpace: number;
-                unusedMonthOutlineColor: Object;
+            calendar?: {
+                cellColor?: ChartStrokeOpacity;
+                cellSize?: number;
+                dayOfWeekLabel?: ChartTextStyle;
+                dayOfWeekRightSpace?: number;
+                daysOfWeek?: string;
+                focusedCellColor?: ChartStrokeOpacity;
+                monthLabel?: ChartTextStyle;
+                monthOutlineColor?: ChartStrokeOpacity;
+                underMonthSpace?: number;
+                underYearSpace?: number;
+                unusedMonthOutlineColor?: ChartStrokeOpacity;
+                yearLabel?: ChartTextStyle;
             };
             colorAxis?: {
-                colors: string[];
-                maxValue: number;
-                minValue: number;
-                values: number[];
+                colors?: string[];
+                maxValue?: number;
+                minValue?: number;
+                values?: number[];
             };
             forceIFrame?: boolean;
             height?: number;
-            noDataPattern?: Object;
-            tooltip: {
+            noDataPattern?: {
+                backgroundColor: string,
+                color: string
+            };
+            tooltip?: {
                 isHtml: boolean;
             };
             width?: number;
+            title?: string;
         }
 
         //#endregion
         //#region Map
 
         // https://developers.google.com/chart/interactive/docs/gallery/map
-        export class Map extends CoreChartBase {
+        export class Map extends ChartBase {
             draw(data: DataTable | DataView, options?: MapOptions): void;
-            getAction(actionID: string): void;
-            getImageURI(): string;
-            getSelection(): any[];
-            getHAxisValue(position: number, axisIndex?: number): number;
-            getVAxisValue(position: number, axisIndex?: number): number;
-            getXLocation(position: number, axisIndex?: number): number;
-            getYLocation(position: number, axisIndex?: number): number;
-            removeAction(actionID: number): void;
-            setAction(action: number): void;
-            setSelection(): void;
-            clearChart(): void;
         }
 
         // https://developers.google.com/chart/interactive/docs/gallery/map#Configuration_Options
@@ -1290,7 +1446,7 @@ declare namespace google {
             zoomLevel?: number;
         }
 
-        //#endregion         
+        //#endregion
         //#region Events
 
         namespace events {
@@ -1495,14 +1651,14 @@ declare namespace google {
              * @param srcColumnIndices - An array of one or more (zero-based) column indices to pull as the sources from the underlying DataTable. This will be used as a data source for the pattern parameter in the constructor. The column numbers do not have to be in sorted order.
              * @param opt_dstColumnIndex - The destination column to place the output of the pattern manipulation. If not specified, the first element in srcColumIndices will be used as the destination.
              */
-            format(dataTable: DataTable, srcColumnIndices: number[], opt_dstColumnIndex?: number): void;
+            format(data: DataTable, srcColumnIndices: number[], opt_dstColumnIndex?: number): void;
         }
 
         //#endregion
         //#region OrgChart
 
         // https://developers.google.com/chart/interactive/docs/gallery/orgchart
-        export class OrgChart extends CoreChartBase {
+        export class OrgChart extends ChartBase {
             draw(data: DataTable | DataView, options: OrgChartOptions): void;
             collapse(row: number, collapsed: boolean): void;
             getChildrenIndexes(row: number): number[];
@@ -1523,6 +1679,119 @@ declare namespace google {
              * @default 'medium'
              */
             size?: string;
+        }
+
+        //#endregion
+        //#region Gantt
+
+        // https://developers.google.com/chart/interactive/docs/gallery/ganttchart
+        export class Gantt extends ChartBaseClearable {
+            draw(data: DataTable | DataView, options: GanttChartOptions): void;
+        }
+
+        // https://developers.google.com/chart/interactive/docs/gallery/ganttchart#configuration-options
+        export interface GanttChartOptions {
+            backgroundColor?: ChartFill;
+            gantt?: GanttOptions;
+            width?: number;
+            height?: number;
+        }
+
+        export interface GanttOptions {
+            arrow?: GanttArrow;
+            barCornerRadius?: number;
+            barHeight?: number;
+            criticalPathEnabled?: boolean;
+            criticalPathStyle?: ChartStroke;
+            defaultStartDate?: Date | number;
+            innerGridHorizLine?: ChartStroke;
+            innerGridTrack?: ChartFill;
+            innerGridDarkTrack?: ChartFill;
+            labelMaxWidth?: number;
+            labelStyle?: LabelStyle;
+            percentEnabled?: boolean;
+            percentStyle?: ChartFill;
+            shadowEnabled?: boolean;
+            shadowStyle?: ChartFill;
+            shadowOffset?: number;
+            sortTasks?: boolean;
+            trackHeight?: number;
+        }
+
+        export interface GanttArrow {
+            angle?: number;
+            color?: string;
+            length?: number;
+            radius?: number;
+            spaceAfter?: number;
+            width?: number;
+        }
+
+
+        //#endregion
+        //#region Gauge
+
+        // https://developers.google.com/chart/interactive/docs/gallery/gauge
+        // Note: can't extend ChartBaseClearable because Gauge doesn't have getSelection(), setSelection()
+        export class Gauge {
+            constructor(element: Element);
+            getContainer(): Element;
+            clearChart(): void;
+            draw(data: DataTable | DataView, options: GaugeChartOptions): void;
+        }
+
+        // https://developers.google.com/chart/interactive/docs/gallery/gauge#configuration-options
+        export interface GaugeChartOptions {
+            animation?: TransitionAnimation;
+            forceIFrame?: boolean;
+            width?: number;
+            height?: number;
+            max?: number;
+            min?: number;
+            majorTicks?: string[];
+            minorTicks?: number;
+            greenColor?: string;
+            greenFrom?: number;
+            greenTo?: number;
+            redColor?: string;
+            redFrom?: number;
+            redTo?: number;
+            yellowColor?: string;
+            yellowFrom?: number;
+            yellowTo?: number;
+        }
+
+        //#endregion
+        //#region Sankey
+
+        // https://developers.google.com/chart/interactive/docs/gallery/sankey
+        export class Sankey extends ChartBaseClearable {
+            draw(data: DataTable | DataView, options: SankeyChartOptions): void;
+        }
+
+        // https://developers.google.com/chart/interactive/docs/gallery/sankey#configuration-options
+        export interface SankeyChartOptions {
+            width?: number;
+            forceIFrame?: boolean;
+            height?: number;
+            sankey?: {
+                iterations?: number;
+                link?: {
+                    color?: string | ChartStrokeFill;
+                    colorMode?: 'none' | 'source' | 'target' | 'gradient';
+                    colors?: string[];
+                };
+                node?: {
+                    colorMode?: 'unique';
+                    colors?: string[];
+                    interactivity?: boolean;
+                    label?: ChartTextStyle;
+                    labelPadding?: number;
+                    nodePadding?: number;
+                    width?: number;
+                };
+                tooltip?: ChartTooltip;
+            };
         }
 
         //#endregion

@@ -1,4 +1,4 @@
-// Type definitions for restify 8.4
+// Type definitions for restify 8.5
 // Project: https://github.com/restify/node-restify, http://restify.com
 // Definitions by: Bret Little <https://github.com/blittle>
 //                 Steve Hipwell <https://github.com/stevehipwell>
@@ -6,6 +6,7 @@
 //                 Mitchell Bundy <https://github.com/mgebundy>
 //                 Alexandre Moraes <https://github.com/alcmoraes>
 //                 Quinn Langille <https://github.com/quinnlangille>
+//                 Gaikwad Pratik <https://github.com/GaikwadPratik>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.2
 
@@ -17,6 +18,7 @@ import url = require('url');
 import spdy = require('spdy');
 import stream = require('stream');
 import zlib = require('zlib');
+import { File } from 'formidable';
 
 export interface ServerOptions {
     ca?: string | Buffer | ReadonlyArray<string | Buffer>;
@@ -371,7 +373,7 @@ export class Router {
      * @param    options an options object
      * @returns  returns the route name if creation is successful.
      */
-    mount(options: RouteOptions, ...handlers: RequestHandlerType[]): string;
+    mount(options: MountOptions, ...handlers: RequestHandlerType[]): string;
 
     /**
      * unmounts a route.
@@ -416,11 +418,6 @@ export class Router {
     onceNext: boolean;
 
     strictNext: boolean;
-}
-
-export interface RequestFileInterface {
-    path: string;
-    type: string;
 }
 
 export interface RequestAuthorization {
@@ -630,7 +627,7 @@ export interface Request extends http.IncomingMessage {
      *  name: 'getpingname'
      * }
      */
-    getRoute(): RouteSpec;
+    getRoute(): Route;
 
     /** bunyan logger you can piggyback on. */
     log: Logger;
@@ -644,8 +641,8 @@ export interface Request extends http.IncomingMessage {
     /** available when queryParser or bodyParser plugin is used with mapParams enabled. */
     params?: any;
 
-    /** available when serveStatic plugin is used. */
-    files?: { [name: string]: RequestFileInterface };
+    /** available when multipartBodyParser plugin is used. */
+    files?: { [name: string]: File | undefined; };
 
     /** available when authorizationParser plugin is used */
     username?: string;

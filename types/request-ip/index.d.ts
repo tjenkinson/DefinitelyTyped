@@ -20,7 +20,7 @@ interface RequestHeaders extends http.IncomingHttpHeaders {
 
 interface Request {
     headers: RequestHeaders;
-    connection: {
+    connection?: {
         remoteAddress?: string;
         socket?: {
             remoteAddress?: string
@@ -38,7 +38,7 @@ interface Options {
     attributeName: string;
 }
 
-export declare function getClientIp(req: Request): string;
+export declare function getClientIp(req: Request): string | null;
 
 export function mw(options?: Options): (req: Request, res: any, next: any) => any;
 

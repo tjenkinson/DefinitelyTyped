@@ -71,6 +71,10 @@ function send(req: restify.Request, res: restify.Response, next: restify.Next) {
     req.getUrl() === url.parse('https://test.test.test/test');
     req.getVersion() === 'test';
     req.version() === 'test';
+    // @ExpectedType restify.Route[]
+    server.router.getRoutes();
+    // @ExpectedType restify.Route
+    req.getRoute();
     req.params;
     res.header('test');
     res.header('test', {});
@@ -143,6 +147,7 @@ server.use(restify.plugins.queryParser());
 server.use(restify.plugins.jsonp());
 server.use(restify.plugins.gzipResponse());
 server.use(restify.plugins.bodyParser());
+server.use(restify.plugins.multipartBodyParser());
 server.use(
   restify.plugins.serveStaticFiles('somePath', {
     etag: '1',
@@ -171,6 +176,19 @@ server.use(restify.plugins.conditionalHandler([{
     },
     version: '0.0.0',
 }]));
+
+server.post("/test-files", (req, res, next) => {
+    const files = req.files;
+    if (files) {
+        const testFile = files["test"];
+        if (testFile) {
+            console.log(testFile.path);
+            console.log(testFile.name);
+            console.log(testFile.size);
+        }
+    }
+    next();
+});
 
 const logger = Logger.createLogger({ name: "test" });
 

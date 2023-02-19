@@ -1,16 +1,23 @@
-// Type definitions for node-forge 0.8.1
+// Type definitions for node-forge 0.10.0
 // Project: https://github.com/digitalbazaar/forge
-// Definitions by: Seth Westphal    <https://github.com/westy92>
-//                 Kay Schecker     <https://github.com/flynetworks>
-//                 Aakash Goenka    <https://github.com/a-k-g>
-//                 Rafal2228        <https://github.com/rafal2228>
-//                 Beeno Tung       <https://github.com/beenotung>
-//                 Joe Flateau      <https://github.com/joeflateau>
-//                 Nikita Koryabkin <https://github.com/Apologiz>
-//                 timhwang21       <https://github.com/timhwang21>
-//                 supaiku0         <https://github.com/supaiku0>
-//                 Anders Kaseorg   <https://github.com/andersk>
-//                 Sascha Zarhuber  <https://github.com/saschazar21>
+// Definitions by: Seth Westphal       <https://github.com/westy92>
+//                 Kay Schecker        <https://github.com/flynetworks>
+//                 Aakash Goenka       <https://github.com/a-k-g>
+//                 Rafal2228           <https://github.com/rafal2228>
+//                 Beeno Tung          <https://github.com/beenotung>
+//                 Joe Flateau         <https://github.com/joeflateau>
+//                 Nikita Koryabkin    <https://github.com/Apologiz>
+//                 timhwang21          <https://github.com/timhwang21>
+//                 supaiku0            <https://github.com/supaiku0>
+//                 Anders Kaseorg      <https://github.com/andersk>
+//                 Sascha Zarhuber     <https://github.com/saschazar21>
+//                 Rogier Schouten     <https://github.com/rogierschouten>
+//                 Ivan Aseev          <https://github.com/aseevia>
+//                 Wiktor Kwapisiewicz <https://github.com/wiktor-k>
+//                 Ligia Frangello     <https://github.com/frangello>
+//                 Dmitry Avezov       <https://github.com/avezov>
+//                 Jose Fuentes        <https://github.com/j-fuentes>
+//                 Anya Reyes          <https://github.com/darkade>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.6
 
@@ -26,11 +33,63 @@ declare module "node-forge" {
     type Encoding = "raw" | "utf8";
 
     namespace jsbn {
+        interface RandomGenerator {
+            nextBytes(bytes: number[]): void;
+        }
         class BigInteger {
+            static ZERO: BigInteger;
+            static ONE: BigInteger;
+            constructor(a: null);
+            constructor(a: number, c: RandomGenerator);
+            constructor(a: number, b: number, c: RandomGenerator);
+            constructor(a: string, b?: number);
+            constructor(a: number[], b?: number);
+            constructor(a: BigInteger);
             data: number[];
             t: number;
             s: number;
-            toString(): string;
+            am(i: number, x: number, w: BigInteger, j: number, c: number, n: number): number;
+            toString(b?: number): string;
+            bitLength(): number;
+            negate(): BigInteger;
+            abs(): BigInteger;
+            compareTo(a: BigInteger): number;
+            bitLength(): number;
+            mod(a: BigInteger): BigInteger;
+            modPowInt(e: number, m: BigInteger): BigInteger;
+            clone(): BigInteger;
+            intValue(): number;
+            byteValue(): number;
+            shortValue(): number;
+            signum(): number;
+            toByteArray(): number[];
+            equals(a: BigInteger): boolean;
+            min(a: BigInteger): BigInteger;
+            max(a: BigInteger): BigInteger;
+            and(a: BigInteger): BigInteger;
+            or(a: BigInteger): BigInteger;
+            xor(a: BigInteger): BigInteger;
+            andNot(a: BigInteger): BigInteger;
+            not(): BigInteger;
+            shiftLeft(n: number): BigInteger;
+            shiftRight(n: number): BigInteger;
+            getLowestSetBit(): number;
+            bitCount(): number;
+            testBit(n: number): boolean;
+            clearBit(n: number): BigInteger
+            flipBit(n: number): BigInteger
+            add(a: BigInteger): BigInteger;
+            subtract(a: BigInteger): BigInteger;
+            multiply(a: BigInteger): BigInteger;
+            square(): BigInteger;
+            divide(a: BigInteger): BigInteger;
+            remainder(a: BigInteger): BigInteger;
+            divideAndRemainder(a: BigInteger): BigInteger[]; // Array of 2 items
+            pow(e: number): BigInteger;
+            modPow(e: BigInteger, m: BigInteger): BigInteger;
+            gcd(a: BigInteger): BigInteger;
+            modInverse(m: BigInteger): BigInteger;
+            isProbablePrime(t: number): boolean;
         }
     }
 
@@ -64,6 +123,35 @@ declare module "node-forge" {
             prfAlgorithm?: 'sha1' | 'sha224' | 'sha256' | 'sha384' | 'sha512';
             legacy?: boolean;
         };
+
+        interface ByteBufferFingerprintOptions {
+            /**
+             * @description The type of fingerprint. If not specified, defaults to 'RSAPublicKey'
+             */
+            type?: 'SubjectPublicKeyInfo' | 'RSAPublicKey';
+            /**
+             * @description the delimiter to use between bytes for `hex` encoded output
+             */
+            delimiter?: string;
+            /**
+             * @description if not specified defaults to `md.md5`
+             */
+            md?: md.MessageDigest;
+        }
+
+        interface HexFingerprintOptions extends ByteBufferFingerprintOptions {
+            /**
+             * @description if not specified, the function will return `ByteStringBuffer`
+             */
+            encoding: 'hex';
+        }
+
+        interface BinaryFingerprintOptions extends ByteBufferFingerprintOptions {
+            /**
+             * @description if not specified, the function will return `ByteStringBuffer`
+             */
+            encoding: 'binary';
+        }
 
         interface KeyPair {
             publicKey: PublicKey;
@@ -247,6 +335,84 @@ declare module "node-forge" {
              */
             verify(child: Certificate): boolean;
 
+            /**
+             * Gets an issuer or subject attribute from its name, type, or short name.
+             *
+             * @param options a short name string or an object with:
+             *          shortName the short name for the attribute.
+             *          name the name for the attribute.
+             *          type the type for the attribute.
+             *
+             * @return the attribute.
+             */
+            getAttribute(opts: string | GetAttributeOpts): Attribute | null;
+
+            /**
+             * Returns true if this certificate's issuer matches the passed
+             * certificate's subject. Note that no signature check is performed.
+             *
+             * @param parent the certificate to check.
+             *
+             * @return true if this certificate's issuer matches the passed certificate's
+             *         subject.
+             */
+            isIssuer(parent: Certificate): boolean;
+
+            /**
+             * Returns true if this certificate's subject matches the issuer of the
+             * given certificate). Note that not signature check is performed.
+             *
+             * @param child the certificate to check.
+             *
+             * @return true if this certificate's subject matches the passed
+             *         certificate's issuer.
+             */
+            issued(child: Certificate): boolean;
+        }
+
+        /**
+         * Attribute members to search on; any one hit will return the attribute
+         */
+        interface GetAttributeOpts {
+            /**
+             * OID
+             */
+            type?: string;
+            /**
+             * Long name
+             */
+            name?: string;
+            /**
+             * Short name
+             */
+            shortName?: string;
+        }
+
+        interface Attribute {
+            /**
+             * e.g. challengePassword
+             */
+            name: string;
+            /**
+             * Short name, if available (e.g. 'CN' for 'commonName')
+             */
+            shortName?: string;
+            /**
+             * OID, e.g. '1.2.840.113549.1.9.7'
+             */
+            type: string;
+            /**
+             * Attribute value
+             */
+            value: any;
+            /**
+             * Attribute value data type
+             */
+            valueTagClass: number;
+            /**
+             * Extensions
+             */
+            extensions?: any[]
         }
 
         interface CAStore {
@@ -262,7 +428,7 @@ declare module "node-forge" {
 
         function certificateToAsn1(cert: Certificate): asn1.Asn1;
 
-        function decryptRsaPrivateKey(pem: PEM, passphrase?: string): PrivateKey;
+        function decryptRsaPrivateKey(pem: PEM, passphrase?: string): rsa.PrivateKey;
 
         function createCertificate(): Certificate;
 
@@ -278,7 +444,13 @@ declare module "node-forge" {
 
         function createCaStore(certs?: ReadonlyArray<Certificate | pki.PEM>): CAStore;
 
-        function verifyCertificateChain(caStore: CAStore, chain: Certificate[], customVerifyCallback?: (verified: boolean | string, depth: number, chain: Certificate[]) => boolean): boolean;
+        function verifyCertificateChain(
+            caStore: CAStore,
+            chain: Certificate[],
+            options?: ((verified: boolean | string, depth: number, certs: Certificate[]) => boolean) | {
+                verify?: (verified: boolean | string, depth: number, certs: Certificate[]) => boolean,
+                validityCheckDate?: Date | null
+            }): boolean;
 
         function pemToDer(pem: PEM): util.ByteStringBuffer;
 
@@ -288,9 +460,11 @@ declare module "node-forge" {
 
         function publicKeyToPem(key: PublicKey, maxline?: number): PEM;
 
-        function publicKeyFromPem(pem: PEM): PublicKey;
+        function publicKeyToRSAPublicKeyPem(key: PublicKey, maxline?: number): PEM;
 
-        function privateKeyFromPem(pem: PEM): PrivateKey;
+        function publicKeyFromPem(pem: PEM): rsa.PublicKey;
+
+        function privateKeyFromPem(pem: PEM): rsa.PrivateKey;
 
         function decryptPrivateKeyInfo(obj: asn1.Asn1, password: string): asn1.Asn1;
 
@@ -300,7 +474,7 @@ declare module "node-forge" {
 
         function encryptedPrivateKeyToPem(obj: asn1.Asn1): PEM;
 
-        function decryptRsaPrivateKey(pem: PEM, password: string): PrivateKey;
+        function decryptRsaPrivateKey(pem: PEM, password: string): rsa.PrivateKey;
 
         function encryptRsaPrivateKey(privateKey: PrivateKey, password: string, options?: EncryptionOptions): PEM;
 
@@ -317,6 +491,10 @@ declare module "node-forge" {
         type setRsaPublicKey = typeof rsa.setPublicKey;
 
         function wrapRsaPrivateKey(privateKey: asn1.Asn1): asn1.Asn1;
+
+        function getPublicKeyFingerprint(publicKey: PublicKey, options?: ByteBufferFingerprintOptions): util.ByteStringBuffer;
+        function getPublicKeyFingerprint(publicKey: PublicKey, options: HexFingerprintOptions): Hex;
+        function getPublicKeyFingerprint(publicKey: PublicKey, options: BinaryFingerprintOptions): Bytes;
     }
 
     namespace random {
@@ -525,10 +703,10 @@ declare module "node-forge" {
 
         interface Pkcs12Pfx {
             version: string;
-            safeContents: [{
+            safeContents: {
                 encrypted: boolean;
                 safeBags: Bag[];
-            }];
+            }[];
             getBags: (filter: BagsFilter) => {
                 [key: string]: Bag[] | undefined;
                 localKeyId?: Bag[];
@@ -571,12 +749,14 @@ declare module "node-forge" {
             content?: string | util.ByteBuffer;
             contentInfo?: { value: any[] };
 
+            certificates: pki.Certificate[];
+
             addCertificate(certificate: pki.Certificate | string): void;
             addSigner(options: {
-                key: string;
+                key: pki.rsa.PrivateKey | string;
                 certificate: pki.Certificate | string;
                 digestAlgorithm: string;
-                authenticatedAttributes: { type: string; value?: string }[];
+                authenticatedAttributes?: { type: string; value?: string }[];
             }): void;
             sign(options?:{
                 detached?: boolean
@@ -585,6 +765,19 @@ declare module "node-forge" {
         }
 
         function createSignedData(): PkcsSignedData;
+
+        interface PkcsEnvelopedData {
+            content?: string | util.ByteBuffer;
+            addRecipient(certificate: pki.Certificate): void;
+            encrypt(): void;
+            toAsn1(): asn1.Asn1;
+        }
+
+        function createEnvelopedData(): PkcsEnvelopedData;
+
+        function messageToPem(msg: PkcsSignedData, maxline?: number): string;
+
+        function messageFromPem(pem: pki.PEM): PkcsEnvelopedData | PkcsSignedData;
     }
 
     namespace pkcs5 {
@@ -627,7 +820,7 @@ declare module "node-forge" {
 
     namespace hmac {
 
-      type Algorithm = "sha1" | "md5" | "sha256";
+      type Algorithm = "sha1" | "md5" | "sha256" | "sha512";
 
       interface HMAC {
           digest(): util.ByteBuffer;

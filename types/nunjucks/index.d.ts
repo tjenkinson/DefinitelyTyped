@@ -1,6 +1,7 @@
 // Type definitions for nunjucks 3.1
 // Project: http://mozilla.github.io/nunjucks/, https://github.com/mozilla/nunjucks
 // Definitions by: Ruben Slabbert <https://github.com/RubenSlabbert>
+//                 Matthew Burstein <https://github.com/MatthewBurstein>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.2
 
@@ -74,15 +75,16 @@ export class Environment {
     renderString(name: string, context: object): string;
     renderString(name: string, context: object, callback?: TemplateCallback<string>): void;
 
-    addFilter(name: string, func: (...args: any[]) => any, async?: boolean): void;
-    getFilter(name: string): void;
+    addFilter(name: string, func: (...args: any[]) => any, async?: boolean): Environment;
+    getFilter(name: string): (...args: any[]) => any;
 
-    addExtension(name: string, ext: Extension): void;
+    addExtension(name: string, ext: Extension): Environment;
     removeExtension(name: string): void;
     getExtension(name: string): Extension;
-    hasExtension(name: string): void;
+    hasExtension(name: string): boolean;
 
-    addGlobal(name: string, value: any): void;
+    addGlobal(name: string, value: any): Environment;
+    getGlobal(name: string): any;
 
     getTemplate(name: string, eagerCompile?: boolean): Template;
     getTemplate(name: string, eagerCompile?: boolean, callback?: Callback<Error, Template>): void;
@@ -102,7 +104,6 @@ export interface ILoader {
     async?: boolean;
     getSource(name: string): LoaderSource;
     getSource(name: string, callback: Callback<Error, LoaderSource>): void;
-    extend?(extender: ILoader): ILoader;
 }
 
 // Needs both Loader and ILoader since nunjucks uses a custom object system
@@ -112,7 +113,7 @@ export class Loader {
     emit(name: string, ...args: any[]): void;
     resolve(from: string, to: string): string;
     isRelative(filename: string): boolean;
-    extend(toExtend: ILoader): ILoader;
+    static extend<LoaderClass extends typeof Loader>(this: LoaderClass, toExtend: ILoader): LoaderClass;
 }
 
 export interface LoaderSource {

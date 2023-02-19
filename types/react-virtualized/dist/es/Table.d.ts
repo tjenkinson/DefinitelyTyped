@@ -229,7 +229,7 @@ export type TableProps = GridCoreProps & {
     /** Optional id */
     id?: string;
     /** Optional renderer to be used in place of table body rows when rowCount is 0 */
-    noRowsRenderer?: () => void;
+    noRowsRenderer?: () => JSX.Element | null;
     /**
      * Optional callback when a column's header is clicked.
      * ({ columnData: any, dataKey: string }): void
@@ -440,3 +440,5 @@ export class Table extends PureComponent<TableProps> {
     /** See Grid#scrollToCell */
     scrollToRow(index?: number): void;
 }
+
+export default Table;

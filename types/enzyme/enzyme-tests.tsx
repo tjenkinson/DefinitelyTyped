@@ -67,7 +67,12 @@ class AnotherComponent extends Component<AnotherComponentProps> {
     setState(...args: any[]) {
         console.log(args);
     }
+
+    handleAnotherEcho(value: string) {
+      return value;
+    }
 }
+
 interface OptionalFunctionProp {
     functionProp?(): void;
     requiredFunctionProp(): void;
@@ -94,7 +99,7 @@ const CommonWrapperHelper = {
         wrapper.invoke('requiredFunctionProp'); // $ExpectType () => void
         wrapper.invoke('singleArg'); // $ExpectType (arg: any) => void
         wrapper.invoke('multipleArg'); // $ExpectType (arg1: number, arg2: string, arg3: boolean) => void
-        wrapper.invoke('multipleReturn'); // $ExpectType () => string | number | boolean | void | null | undefined
+        wrapper.invoke('multipleReturn'); // $ExpectType () => string | number | boolean | void | null | undefined || () => string | number | boolean | void | null
         wrapper.invoke(undefined); // $ExpectError
         wrapper.invoke(null); // $ExpectError
         wrapper.invoke('nonFun'); // $ExpectError
@@ -649,6 +654,11 @@ function ReactWrapperTest() {
         reactWrapper = reactWrapper.find({ prop: 'myprop' });
     }
 
+    function test_findWithType() {
+      const anotherComponentTypedWrapper = reactWrapper.find<AnotherComponent>(AnotherComponent);
+      anotherComponentTypedWrapper.instance().handleAnotherEcho('it works');
+    }
+
     function test_findWhere() {
         reactWrapper =
             reactWrapper.findWhere((aReactWrapper: ReactWrapper<MyComponentProps, MyComponentState>) => true);
@@ -988,7 +998,7 @@ function ReactWrapperTest() {
 
 // CheerioWrapper
 function CheerioWrapperTest() {
-    const wrapper: Cheerio =
+    const wrapper: cheerio.Cheerio =
         shallow(<div />).render() ||
         mount(<div />).render();
 

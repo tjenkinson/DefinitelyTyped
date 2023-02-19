@@ -2,7 +2,7 @@
 // Project: http://strophe.im/strophejs/
 // Definitions by: David Deutsch <https://github.com/DavidKDeutsch>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.1
+// TypeScript Version: 3.2
 
 export namespace Strophe {
     /** Constant: VERSION
@@ -539,9 +539,9 @@ export namespace Strophe {
     }
 
     interface ConnectionOptions {
-        keepalive?: boolean;
-        protocol?: string;
-        sync?: boolean;
+        keepalive?: boolean | undefined;
+        protocol?: string | undefined;
+        sync?: boolean | undefined;
     }
 
     /** Class: Strophe.Connection
@@ -941,8 +941,8 @@ export namespace Strophe {
          *    A reference to the handler that can be used to remove it.
          */
         addHandler(
-		   handler: (stanza: Element) => any,
-		   ns: string, name: string,
+           handler: (stanza: Element) => any,
+           ns: string, name: string,
                    type: string,
                    id: string,
                    from: string,
